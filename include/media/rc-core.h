@@ -100,6 +100,7 @@ struct rc_dev {
 	bool				idle;
 	u64				allowed_protos;
 	u32				scanmask;
+	u32				users;
 	void				*priv;
 	spinlock_t			keylock;
 	bool				keypressed;
@@ -139,6 +140,9 @@ struct rc_dev *rc_allocate_device(void);
 void rc_free_device(struct rc_dev *dev);
 int rc_register_device(struct rc_dev *dev);
 void rc_unregister_device(struct rc_dev *dev);
+
+int rc_open(struct rc_dev *rdev);
+void rc_close(struct rc_dev *rdev);
 
 void rc_repeat(struct rc_dev *dev);
 void rc_keydown(struct rc_dev *dev, int scancode, u8 toggle);

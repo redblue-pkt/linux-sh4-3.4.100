@@ -28,6 +28,8 @@ int main(void)
 	DEFINE(TI_RESTART_BLOCK,offsetof(struct thread_info, restart_block));
 	DEFINE(TI_SIZE,		sizeof(struct thread_info));
 
+	DEFINE(_PTRS_PER_PGD,	PTRS_PER_PGD);
+
 #ifdef CONFIG_HIBERNATION
 	DEFINE(PBE_ADDRESS, offsetof(struct pbe, address));
 	DEFINE(PBE_ORIG_ADDRESS, offsetof(struct pbe, orig_address));

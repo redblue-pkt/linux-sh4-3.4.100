@@ -51,6 +51,7 @@ struct sh_cpuinfo cpu_data[NR_CPUS] __read_mostly = {
 	[0] = {
 		.type			= CPU_SH_NONE,
 		.family			= CPU_FAMILY_UNKNOWN,
+		.variant		= CPU_VARIANT_UNKNOWN,
 		.loops_per_jiffy	= 10000000,
 		.phys_bits		= MAX_PHYSMEM_BITS,
 	},
@@ -172,6 +173,8 @@ disable:
 #endif
 }
 
+#ifndef CONFIG_GENERIC_CALIBRATE_DELAY
+
 void __cpuinit calibrate_delay(void)
 {
 	struct clk *clk = clk_get(NULL, "cpu_clk");
@@ -187,6 +190,8 @@ void __cpuinit calibrate_delay(void)
 			 (loops_per_jiffy/(5000/HZ)) % 100,
 			 loops_per_jiffy);
 }
+
+#endif
 
 void __init __add_active_range(unsigned int nid, unsigned long start_pfn,
 						unsigned long end_pfn)

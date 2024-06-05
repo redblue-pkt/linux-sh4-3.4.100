@@ -31,7 +31,6 @@
 extern unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)];
 #define ZERO_PAGE(vaddr) (virt_to_page(empty_zero_page))
 
-#endif /* !__ASSEMBLY__ */
 
 /*
  * Effective and physical address definitions, to aid with sign
@@ -46,6 +45,8 @@ static inline unsigned long long neff_sign_extend(unsigned long val)
 	unsigned long long extended = val;
 	return (extended & NEFF_SIGN) ? (extended | NEFF_MASK) : extended;
 }
+
+#endif /* !__ASSEMBLY__ */
 
 #ifdef CONFIG_29BIT
 #define NPHYS		29
@@ -67,6 +68,7 @@ static inline unsigned long long neff_sign_extend(unsigned long val)
 #define PHYS_ADDR_MASK29		0x1fffffff
 #define PHYS_ADDR_MASK32		0xffffffff
 
+#ifndef __ASSEMBLY__
 static inline unsigned long phys_addr_mask(void)
 {
 	/* Is the MMU in 29bit mode? */
@@ -75,12 +77,26 @@ static inline unsigned long phys_addr_mask(void)
 
 	return PHYS_ADDR_MASK32;
 }
+#else
+/* FIXME: Horrible bodge to allow access to this in assembler.
+ * We assume that you are not mad enough to switch it 
+ * dynamically post boot
+ */
+#ifdef CONFIG_32BIT
+#define phys_addr_mask() PHYS_ADDR_MASK32
+#else
+#define phys_addr_mask() PHYS_ADDR_MASK29
+#endif
+
+#endif /* !__ASSEMBLY__ */
 
 #define PTE_PHYS_MASK		(phys_addr_mask() & PAGE_MASK)
 #define PTE_FLAGS_MASK		(~(PTE_PHYS_MASK) << PAGE_SHIFT)
 
 #ifdef CONFIG_SUPERH32
-#define VMALLOC_START	(P3SEG)
+#define CONSISTENT_BASE	(P3SEG)
+#define CONSISTENT_END	(P3SEG+0x01000000)
+#define VMALLOC_START	CONSISTENT_END
 #else
 #define VMALLOC_START	(0xf0000000)
 #endif
@@ -119,6 +135,8 @@ static inline unsigned long phys_addr_mask(void)
 #define __S101	PAGE_EXECREAD
 #define __S110	PAGE_RWX
 #define __S111	PAGE_RWX
+
+#ifndef __ASSEMBLY__
 
 typedef pte_t *pte_addr_t;
 
@@ -161,6 +179,7 @@ extern void page_table_range_init(unsigned long start, unsigned long end,
 
 #define __HAVE_ARCH_PTE_SPECIAL
 
+#endif /* !__ASSEMBLY__ */
 #include <asm-generic/pgtable.h>
 
 #endif /* __ASM_SH_PGTABLE_H */

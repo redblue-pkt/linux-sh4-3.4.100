@@ -81,15 +81,101 @@ config 32BIT
 	bool
 	default y if CPU_SH5 || !MMU
 
+config SUPPORTS_32BIT
+	bool
+	default n
+
 config PMB
 	bool "Support 32-bit physical addressing through PMB"
-	depends on MMU && EXPERIMENTAL && CPU_SH4A && !CPU_SH4AL_DSP
+	depends on MMU && EXPERIMENTAL && SUPPORTS_32BIT
 	select 32BIT
 	select UNCACHED_MAPPING
 	help
 	  If you say Y here, physical addressing will be extended to
 	  32-bits through the SH-4A PMB. If this is not set, legacy
 	  29-bit physical addressing will be used.
+
+choice
+	prompt "PMB implementation"
+	depends on PMB
+	default PMB_ST if CPU_SUBTYPE_ST40
+	default PMB_RENESAS if !CPU_SUBTYPE_ST40
+
+config PMB_ST
+	bool "STMicroelectronics"
+	help
+	  This selects the STMicroelectronics PMB implementation.
+	  This requires one uncached mapping to be present at boot time.
+	  It also uses more sophisticated algorithms to try to make optimal
+	  use of the PMBs. Ideally the ST and Renesas implementations should
+	  be merged, but this is tricky to do without testing on both platforms.
+
+config PMB_RENESAS
+	bool "Renesas"
+	help
+	  This selects the Renesas implementation of PMB support.
+	  This requires that two PMB mappings are present at boot,
+	  a cached and uncached mapping at 80000000 and A0000000 mirroring
+	  the 29 bit legacy setup.
+
+endchoice
+
+config PMB_64M_TILES
+	bool "Tile P1/P2 region with 64M PMB entries"
+	depends on PMB_ST
+	help
+	  PMB lookups are architecturally defined such that if a miss
+	  occurs when accessing the P1/P2 region a reset will occur.
+	  This can make debugging kernel code very difficult, as a
+	  stray pointer will cause a reset rather than an exception as
+	  on most other architectures.
+
+	  To help with this problem, this option can be enabled which
+	  ensures that the entire P1/P2 region is always filled with
+	  PMB entries, so that a PMB miss can never occur.
+
+	  The disadvantags of enabing this option is that only 64M PMB
+	  entries can be used, as this the only way to guantee that
+	  there will always be sufficient PMB entries to fill the
+	  P1/P2 virtual region. This may mean that some PMB
+	  configurations which work without this option enabled fail
+	  when it is enabled.
+
+	  The second disadvantage is that the mappings created in this
+	  way are completly valid for read and write accesses (there
+	  is no way to cause an exception on a PMB hit either).
+	  Entries configured in this way can be mapped to any chosen
+	  physical address, using the option PMB_64M_TILES_PHYS
+	  below, which defaults to the start of kernel memory, which
+	  may cause corruption of code or data in this region if a
+	  invalid address is written to. It may be possible to choose
+	  another address which is less damaging, but that will depend
+	  on the SoC and application.
+
+config PMB_64M_TILES_PHYS
+	hex "PMB workaround physical memory start address"
+	depends on PMB_64M_TILES
+	default MEMORY_START
+	help
+	  The physical address to be used for any PMB mappings used to
+	  fill in holes in the virtual address space when PMB_64M_TILES
+	  is enabled.
+
+config PMB_LARGE_UNCACHED_MAPPING
+	bool "Map all of kernel memory uncached using the PMB"
+	depends on PMB
+	help
+	  Normally when the kernel boots it maps the entire kernel logical
+	  memory region into the kernel's address space using the PMB.
+	  A small uncached region is also created to map some key functions
+	  which must be executed from uncached code. In some circumstances
+	  it might be useful to have this uncached region expanded to cover
+	  the entire kernel memory space, for example if the P1/P2 portion
+	  of the address space has very little free space, and it is known
+	  that this uncached mapping will be needed later.
+
+	  Note that on systems with more than 512MB kernel memory this will
+	  prevent the system booting, so should not be enabled.
 
 config X2TLB
 	def_bool y
@@ -272,6 +358,33 @@ config CACHE_WRITETHROUGH
 
 config CACHE_OFF
 	bool "Off"
+
+endchoice
+
+config STM_L2_CACHE
+	bool "STM Level-2 cache support"
+	depends on CPU_ST40_300
+	help
+	  Selecting this option will enable support for Level-2
+	  cache present in some of the STMicroelectronics SOCs.
+
+choice
+	prompt "Default Level-2 cache mode"
+	depends on STM_L2_CACHE
+	default STM_L2_CACHE_WRITEBACK
+	help
+	  Select a mode the Level-2 cache should be configured by
+	  default. This may be changed in runtime using
+	  "/sys/kernel/mm/l2/mode" file.
+
+config STM_L2_CACHE_BYPASSED
+	bool "Bypassed"
+
+config STM_L2_CACHE_WRITETHROUGH
+	bool "Write-through"
+
+config STM_L2_CACHE_WRITEBACK
+	bool "Write-back"
 
 endchoice
 

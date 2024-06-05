@@ -57,6 +57,8 @@ extern struct bus_type spi_bus_type;
  * @modalias: Name of the driver to use with this device, or an alias
  *	for that name.  This appears in the sysfs "modalias" attribute
  *	for driver coldplugging, and in uevents used for hotplugging
+ * @cs_gpio: gpio number of the chipselect line (optional, -ENOENT when
+ *	when not using a GPIO line)
  *
  * A @spi_device is used to interchange data between an SPI slave
  * (usually a discrete chip) and CPU memory.
@@ -90,6 +92,7 @@ struct spi_device {
 	void			*controller_state;
 	void			*controller_data;
 	char			modalias[SPI_NAME_SIZE];
+	int			cs_gpio;	/* chip select gpio */
 
 	/*
 	 * likely need more hooks for more protocol options affecting how
@@ -257,6 +260,9 @@ static inline void spi_unregister_driver(struct spi_driver *sdrv)
  * @unprepare_transfer_hardware: there are currently no more messages on the
  *	queue so the subsystem notifies the driver that it may relax the
  *	hardware by issuing this call
+ * @cs_gpios: Array of GPIOs to use as chip select lines; one per CS
+ *	number. Any individual value may be -ENOENT for CS lines that
+ *	are not GPIOs (driven by the SPI controller itself).
  *
  * Each SPI master controller can communicate with one or more @spi_device
  * children.  These make a small bus, sharing MOSI, MISO and SCK signals
@@ -362,6 +368,8 @@ struct spi_master {
 	int (*transfer_one_message)(struct spi_master *master,
 				    struct spi_message *mesg);
 	int (*unprepare_transfer_hardware)(struct spi_master *master);
+	/* gpio chip select */
+	int			*cs_gpios;
 };
 
 static inline void *spi_master_get_devdata(struct spi_master *master)

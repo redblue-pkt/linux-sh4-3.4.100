@@ -1,0 +1,197 @@
+/*
+ * Copyright (C) 2013 STMicroelectronics Limited.
+ * Author(s): Giuseppe Cavallaro <peppe.cavallaro@st.com>
+ *		Aymen Bouattay <aymen.bouattay@st.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * publishhed by the Free Software Foundation.
+ */
+
+#include "stm-padcfg.h"
+
+/*
+  This is the USB layout available on StiH407 SoC.
+
+  -------------  --------------     -------------------- 	   |----------
+  |OTG USB2_#0 |  |DRD USB2_#1 |     |     DRD USB3     |	   | Host
+  -------------  --------------     --------------------	   |----------
+       |	      |				|		   |
+     (port #0)	   (port #1)	       	    (port #2)		   | Port
+  .............................................    ............	   | ----
+       usb2	 	usb2		   usb2		usb3	   | Protocol
+  .............................................    ...........	   |-----------
+    |_______________pico PHY ________________|     |__MiPHY___|	   | PHY
+								   |-----------
+
+
+  Currently the USB3 is only supported and it manages the port#2 that supports
+  both usb3 (via miphy) and usb2 (via picophy) protocols.
+
+ */
+
+/ {
+	/* --------------------- USB DWC3 Controller ----------------------*/
+	soc {
+		dwc3@8f94000 {
+			usb3_dev_config: usb3-dev-config {
+				/*
+				 * device-seqs to be set in board dtsp according to
+				 * operational mode configred HOST/DEVICE
+				 */
+				padcfg-0 	= <&padcfg_usb3>;
+				sysconfs{
+
+					/* USB PicoPHY reset */
+					USB_SOFT_RESET_PICOPHY = <&sysconf 5132 30 30>;
+
+					/* To exit out from reset state */
+					/* Powerdown requests control */
+					USB_HOST_PWR = <&sysconf 5001 6 6>;
+					USB_PWR_ACK  = <&sysconf 5501 6 6>;
+
+					/* USB3_10 Control */
+					USB3_PORT2_DEVICE_NOT_HOST = <&sysconf 5068 0 0>;
+					USB3_PORT2_FORCE_VBUSVALID = <&sysconf 5068 1 1>;
+					USB3_PORT2_DELAY_VBUSVALID_N = <&sysconf 5068 2 2>;
+					USB3_PORT2_SEL_FORCE_OPMODE = <&sysconf 5068 4 4>;
+					USB3_PORT2_FORCE_OPMODE = <&sysconf 5068 5 6>;
+					USB3_PORT2_SEL_FORCE_DPPULLDOWN2 = <&sysconf 5068 8 8>;
+					USB3_PORT2_FORCE_DPPULLDOWN2 = <&sysconf 5068 9 9>;
+					USB3_PORT2_SEL_FORCE_DMPULLDOWN2 = <&sysconf 5068 10 10>;
+					USB3_PORT2_FORCE_DMPULLDOWN2 = <&sysconf 5068 11 11>;
+
+					/* To program USB2 pico PHY control */
+					USB3_PORT2_PICOPHY_REFCLKSEL =  <&sysconf 5061 0 1>;
+					USB3_PORT2_PICOPHY_FSEL =  <&sysconf 5061 2 4>;
+					USB3_PORT2_PICOPHY_RESET2 =  <&sysconf 5061 7 7>;
+
+					/* port #2 parameters overriding */
+					USB3_PORT2_PICOPHY_COMPDISTUNE2 =  <&sysconf 5064 0 2>;
+					USB3_PORT2_PICOPHY_SQRXTUNE2 =  <&sysconf 5064 3 5>;
+					USB3_PORT2_PICOPHY_TXFSLSTUNE2 =  <&sysconf 5064 6 9>;
+					USB3_PORT2_PICOPHY_TXPREEMPAMPTUNE2 =  <&sysconf 5064 10 11>;
+					USB3_PORT2_PICOPHY_TXPREEMPPULSETUNE2 =  <&sysconf 5064 12 12>;
+					USB3_PORT2_PICOPHY_TXRISETUNE2 =  <&sysconf 5064 13 14>;
+					USB3_PORT2_PICOPHY_TXVREFTUNE2 =  <&sysconf 5064 15 18>;
+					USB3_PORT2_PICOPHY_TXHSXVTUNE2 =  <&sysconf 5064 19 20>;
+					USB3_PORT2_PICOPHY_TXRESTUNE2 =  <&sysconf 5064 21 22>;
+				};
+			};
+
+			/* HOST mode init sequence */
+			usb3_host_dev_seqs: usb3-host-dev-seqs{
+				init-seq {
+
+					step0 {
+						/* USB PicoPHY reset */
+						USB_SOFT_RESET_PICOPHY = <1>;
+
+						USB3_PORT2_DEVICE_NOT_HOST = <0>;
+						USB3_PORT2_FORCE_VBUSVALID = <0>;
+						USB3_PORT2_DELAY_VBUSVALID_N = <0>;
+						USB3_PORT2_SEL_FORCE_OPMODE = <0>;
+						USB3_PORT2_FORCE_OPMODE = <0>;
+						USB3_PORT2_SEL_FORCE_DPPULLDOWN2 = <0>;
+						USB3_PORT2_FORCE_DPPULLDOWN2 = <0>;
+						USB3_PORT2_SEL_FORCE_DMPULLDOWN2 = <0>;
+						USB3_PORT2_FORCE_DMPULLDOWN2 = <0>;
+						type = "sysconf";
+					};
+
+					step1 {
+						USB3_PORT2_PICOPHY_REFCLKSEL = <2>;
+						USB3_PORT2_PICOPHY_FSEL = <1>;
+						USB3_PORT2_PICOPHY_RESET2 = <0>;
+						USB3_PORT2_PICOPHY_COMPDISTUNE2 = <4>;
+						USB3_PORT2_PICOPHY_SQRXTUNE2 = <3>;
+						USB3_PORT2_PICOPHY_TXFSLSTUNE2 = <3>;
+						USB3_PORT2_PICOPHY_TXPREEMPAMPTUNE2 = <1>;
+						USB3_PORT2_PICOPHY_TXPREEMPPULSETUNE2 = <0>;
+						USB3_PORT2_PICOPHY_TXRISETUNE2 = <1>;
+						USB3_PORT2_PICOPHY_TXVREFTUNE2 = <0xd>;
+						USB3_PORT2_PICOPHY_TXHSXVTUNE2 = <3>;
+						USB3_PORT2_PICOPHY_TXRESTUNE2 = <1>;
+						type = "sysconf";
+					};
+				};
+				power-on-seq{
+					step0 {
+						USB_HOST_PWR = <0>;
+						type = "sysconf";
+					};
+					step1{
+						USB_PWR_ACK = <0>;
+						type = "sysconf-feedback";
+					};
+				};
+				power-off-seq{
+					step0 {
+						USB_HOST_PWR = <1>;
+						type = "sysconf";
+					};
+					step1{
+						USB_PWR_ACK = <1>;
+						type = "sysconf-feedback";
+					};
+				};
+			};
+
+			/* DEVICE mode init sequence */
+			usb3_device_dev_seqs: usb3-device-dev-seqs{
+				init-seq{
+
+					step0 {
+						USB_SOFT_RESET_PICOPHY = <1>;
+
+						USB3_PORT2_DEVICE_NOT_HOST = <1>;
+						USB3_PORT2_FORCE_VBUSVALID = <0>;
+						USB3_PORT2_DELAY_VBUSVALID_N = <1>;
+						USB3_PORT2_SEL_FORCE_OPMODE = <0>;
+						USB3_PORT2_FORCE_OPMODE = <0>;
+						USB3_PORT2_SEL_FORCE_DPPULLDOWN2 = <0>;
+						USB3_PORT2_FORCE_DPPULLDOWN2 = <0>;
+						USB3_PORT2_SEL_FORCE_DMPULLDOWN2 = <0>;
+						USB3_PORT2_FORCE_DMPULLDOWN2 = <0>;
+						type = "sysconf";
+					};
+					step1 {
+						USB3_PORT2_PICOPHY_REFCLKSEL = <2>;
+						USB3_PORT2_PICOPHY_FSEL = <1>;
+						USB3_PORT2_PICOPHY_RESET2 = <0>;
+						USB3_PORT2_PICOPHY_COMPDISTUNE2 = <4>;
+						USB3_PORT2_PICOPHY_SQRXTUNE2 = <3>;
+						USB3_PORT2_PICOPHY_TXFSLSTUNE2 = <3>;
+						USB3_PORT2_PICOPHY_TXPREEMPAMPTUNE2 = <1>;
+						USB3_PORT2_PICOPHY_TXPREEMPPULSETUNE2 = <0>;
+						USB3_PORT2_PICOPHY_TXRISETUNE2 = <1>;
+						USB3_PORT2_PICOPHY_TXVREFTUNE2 = <0xd>;
+						USB3_PORT2_PICOPHY_TXHSXVTUNE2 = <3>;
+						USB3_PORT2_PICOPHY_TXRESTUNE2 = <1>;
+						type = "sysconf";
+					};
+				};
+				power-on-seq{
+					step0 {
+						USB_HOST_PWR = <0>;
+						type = "sysconf";
+					};
+					step1{
+						USB_PWR_ACK = <0>;
+						type = "sysconf-feedback";
+					};
+				};
+				power-off-seq{
+					step0 {
+						USB_HOST_PWR = <1>;
+						type = "sysconf";
+					};
+					step1{
+						USB_PWR_ACK = <1>;
+						type = "sysconf-feedback";
+					};
+				};
+			};
+		};
+	};
+};

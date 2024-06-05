@@ -17,7 +17,7 @@
 
 void __cpuinit cpu_probe(void)
 {
-	unsigned long pvr, prr, cvr;
+	unsigned long pvr, prr_all, prr, cvr, ramcr;
 	unsigned long size;
 
 	static unsigned long sizes[16] = {
@@ -29,7 +29,8 @@ void __cpuinit cpu_probe(void)
 	};
 
 	pvr = (__raw_readl(CCN_PVR) >> 8) & 0xffffff;
-	prr = (__raw_readl(CCN_PRR) >> 4) & 0xff;
+	prr_all = __raw_readl(CCN_PRR);
+	prr = (prr_all >> 4) & 0xff;
 	cvr = (__raw_readl(CCN_CVR));
 
 	/*
@@ -78,6 +79,9 @@ void __cpuinit cpu_probe(void)
 	/* FPU detection works for almost everyone */
 	if ((cvr & 0x20000000))
 		boot_cpu_data.flags |= CPU_HAS_FPU;
+
+	/* We don't know the chip cut */
+	boot_cpu_data.cut_major = boot_cpu_data.cut_minor = -1;
 
 	/* Mask off the upper chip ID */
 	pvr &= 0xffff;
@@ -164,6 +168,30 @@ void __cpuinit cpu_probe(void)
 	case 0x4000:	/* 1st cut */
 	case 0x4001:	/* 2nd cut */
 		boot_cpu_data.type = CPU_SHX3;
+		break;
+	case 0x9090 ... 0x9094:
+		/* ST40-300 core */
+		switch (prr_all) {
+		case 0xa300 ... 0xa3ff:
+			boot_cpu_data.type = CPU_STX7108;
+			break;
+		case 0xa800 ... 0xa8ff:
+			boot_cpu_data.type = CPU_STIH415;
+			break;
+		case 0xaa00 ... 0xaaff:
+			boot_cpu_data.type = CPU_STXH205;
+			break;
+		default:
+			boot_cpu_data.type = CPU_SH_NONE;
+			break;
+		}
+		boot_cpu_data.variant = CPU_VARIANT_ST40_300;
+		boot_cpu_data.flags |= CPU_HAS_FPU;
+		boot_cpu_data.flags |= CPU_HAS_ICBI | CPU_HAS_SYNCO | CPU_HAS_FPCHG;
+		boot_cpu_data.flags &= ~CPU_HAS_PTEA;
+		ramcr = __raw_readl(CCN_RAMCR);
+		boot_cpu_data.icache.ways = (ramcr & (1<<7)) ? 2 : 4;
+		boot_cpu_data.dcache.ways = (ramcr & (1<<6)) ? 2 : 4;
 		break;
 	case 0x700:
 		boot_cpu_data.type = CPU_SH4_501;

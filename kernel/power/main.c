@@ -16,6 +16,7 @@
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>
 
+#include <linux/hom.h>
 #include "power.h"
 
 DEFINE_MUTEX(pm_mutex);
@@ -259,6 +260,9 @@ static ssize_t state_show(struct kobject *kobj, struct kobj_attribute *attr,
 			s += sprintf(s,"%s ", pm_states[i]);
 	}
 #endif
+#ifdef CONFIG_HIBERNATION_ON_MEMORY
+	s += sprintf(s, "%s ", "hom");
+#endif
 #ifdef CONFIG_HIBERNATION
 	s += sprintf(s, "%s\n", "disk");
 #else
@@ -283,12 +287,20 @@ static ssize_t state_store(struct kobject *kobj, struct kobj_attribute *attr,
 	p = memchr(buf, '\n', n);
 	len = p ? p - buf : n;
 
+#ifdef CONFIG_HIBERNATION_ON_DISK
 	/* First, check if we are requested to hibernate */
 	if (len == 4 && !strncmp(buf, "disk", len)) {
 		error = hibernate();
 		goto Exit;
 	}
-
+#endif
+#ifdef CONFIG_HIBERNATION_ON_MEMORY
+	/* Second,  check if we are requesting the hibernate on memory */
+	if (len == 3 && !strncmp(buf, "hom", len)) {
+		error = hibernate_on_memory();
+  goto Exit;
+	}
+#endif
 #ifdef CONFIG_SUSPEND
 	for (s = &pm_states[state]; state < PM_SUSPEND_MAX; s++, state++) {
 		if (*s && len == strlen(*s) && !strncmp(buf, *s, len)) {
@@ -439,8 +451,12 @@ static int __init pm_init(void)
 	int error = pm_start_workqueue();
 	if (error)
 		return error;
+
+#ifdef CONFIG_HIBERNATION_ON_DISK
 	hibernate_image_size_init();
 	hibernate_reserved_size_init();
+#endif
+
 	power_kobj = kobject_create_and_add("power", NULL);
 	if (!power_kobj)
 		return -ENOMEM;

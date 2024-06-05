@@ -1,0 +1,47 @@
+===============================================================================
+			stm dac sysconf converter
+===============================================================================
+
+Required properties:
+- compatible		: Should be "st,snd_conv_dac_sc".
+- source-bus-id    	: Player device is attached to.
+- channel-to	     	: Output channel (usually 1).
+- channel-from	     	: Input channel (usually 0).
+- not-reset	     	: Not reset sysconf (req).
+
+Optional properties
+- format		: Bitmask of the supported converter audio format
+- oversampling		: Number of time oversampling (default is 256)
+
+Only one of these should be provided:
+- not-standby		: Not standby sysconf.
+- standby		: Standby sysconf.
+
+Only provide either softmute or mute-left and mute-right
+- softmute		: Softmute sysconf.
+- mute-left		: Mute left channel sysconf.
+- mute-right		: Mute right channel sysconf.
+
+- mode			: Mode sysconf.
+
+Only on of these should be provided:
+- analog-not-pwr-dwn	: Analog not power down sysconf.
+- analog-pwr-dwn	: Analog power down sysconf.
+
+- analog-not-pwr-dwn-bg	: Analog not power down band gap sysconf.
+- analog-standby	: Analog standby sysconf.
+
+Typical usage example:
+
+snd_conv_dac_sc: snd-conv-dac-sc {
+	compatible	= "st,snd_conv_dac_sc";
+	status		= "disabled";
+	source-bus-id	= "snd_uni_player.0";
+	channel-to	= <1>;
+	channel-from	= <0>;
+	oversampling	= <128>;
+	not-reset	= <&sysconf 917 0 0>;
+	standby		= <&sysconf 917 1 1>;
+	mute-left	= <&sysconf 917 2 2>;
+	mute-right	= <&sysconf 917 3 3>;
+};

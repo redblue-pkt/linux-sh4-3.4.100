@@ -1,0 +1,260 @@
+menuconfig SND_STM
+	tristate "STMicroelectronics SoCs support"
+	depends on SND
+	depends on STM_DRIVERS
+	select SND_PCM
+	select DMADEVICES
+	select STM_FDMA
+	select BPA2
+	help
+		Say Y here for ALSA support on the STMicroelectronics SoCs.
+
+		This driver provides core functionality - you have to build
+		(at least one) SoC-specific driver as well. Additionally, it is
+		using dynamic device minor number allocation, so udev-like
+		utility is required.
+
+		It is recommended to have BPA2 enabled with dedicated
+		partition defined, however it is not absolutely necessary.
+
+		To compile this driver as a module, choose M here: the module
+	 	will be called snd-stm.ko
+
+config SND_STM_PCM_PLAYER
+	tristate
+	depends on SND_STM
+	default n
+
+config SND_STM_PCM_READER
+	tristate
+	depends on SND_STM
+	default n
+
+config SND_STM_SPDIF_PLAYER
+	tristate
+	depends on SND_STM
+	default n
+
+config SND_STM_UNIPERIF_PLAYER
+	tristate
+	depends on SND_STM
+	select STM_FDMA_AUDIO
+	default n
+
+config SND_STM_UNIPERIF_READER
+	tristate
+	depends on SND_STM
+	default n
+
+config SND_STM_CONV_BIPHASE
+	tristate
+	depends on SND_STM
+	default n
+
+config SND_STM_CONV_DAC_MEMORY_MAPPED
+	tristate
+	depends on SND_STM
+	default n
+
+config SND_STM_CONV_DAC_SYSCONF
+	tristate
+	depends on SND_STM
+	default n
+
+config SND_STM_CONV_I2S_TO_SPDIF
+	tristate
+	depends on SND_STM
+	default n
+
+config SND_STM_CONV_SPDIF_RX
+	tristate
+	depends on SND_STM
+	default n
+
+config SND_STM_BPA2_PARTITION_NAME
+	string "Name of BPA2 partition to allocate buffers from"
+	depends on SND_STM
+	depends on BPA2
+	default "audio"
+	help
+		Define a name of BPA2 partition the driver should try to
+		allocate from.
+
+		If name is not given or given partition does not exist, driver
+		will try to use "bigphysmem" partition or eventually
+		preallocate some system memory using
+		ALSA snd_pcm_lib_preallocate_pages_for_all() method.
+
+		This value can be overridden by module parameter
+		"bpa2_part=<name>" (or kernel command line parameter
+		"snd-stm.bpa2_part=<name>", if driver is compiled into
+		kernel).
+
+comment "SOC support"
+	depends on SND_STM
+
+config SND_STM_AUDIO_GLUE
+       tristate "Audio Glue driver"
+       depends on SND_STM
+       default y
+
+config SND_STM_FLI7610
+	tristate "FLi7610 support"
+	depends on SND_STM
+	default y if CPU_SUBTYPE_FLI7610
+	select SND_STM_UNIPERIF_PLAYER
+	select SND_STM_UNIPERIF_READER
+	select SND_STM_CONV_BIPHASE
+	select SND_STM_CONV_DUMMY
+	select SND_STM_CONV_GPIO
+	select SND_STM_CONV_SPDIF_RX
+	help
+		Select this to get ALSA driver for FLi7610 chip.
+
+		If you compile this driver as a module, it will be
+		called snd-stm-stih415.ko
+
+config SND_STM_STX7108
+	tristate "STx7108 support"
+	depends on SND_STM
+	default y if CPU_SUBTYPE_STX7108
+	select SND_STM_PCM_PLAYER
+	select SND_STM_PCM_READER
+	select SND_STM_SPDIF_PLAYER
+	select SND_STM_CONV_DAC_SYSCONF
+	select SND_STM_CONV_I2S_TO_SPDIF
+	help
+		Select this to get ALSA driver for STx7108 chip.
+
+		If you compile this driver as a module, it will be
+		called snd-stm-stx7108.ko
+
+config SND_STM_STXH205
+	tristate "STxH205 support"
+	depends on SND_STM
+	default y if CPU_SUBTYPE_STXH205
+	select SND_STM_PCM_PLAYER
+	select SND_STM_PCM_READER
+	select SND_STM_SPDIF_PLAYER
+	select SND_STM_CONV_DAC_SYSCONF
+	select SND_STM_CONV_I2S_TO_SPDIF
+	help
+		Select this to get ALSA driver for STxH205 chip.
+
+		If you compile this driver as a module, it will be
+		called snd-stm-stxh205.ko
+
+config SND_STM_STIH407
+	tristate "STiH407 support"
+	depends on SND_STM
+	default y if MACH_STM_STIH407
+	select SND_STM_AUDIO_GLUE
+	select SND_STM_UNIPERIF_PLAYER
+	select SND_STM_UNIPERIF_READER
+	select SND_STM_CONV_BIPHASE
+	select SND_STM_CONV_DAC_SYSCONF
+	help
+		Select this to get ALSA driver for STiH407 chip.
+
+config SND_STM_STIH415
+	tristate "STih415 support"
+	depends on SND_STM
+	default y if CPU_SUBTYPE_STIH415
+	select SND_STM_AUDIO_GLUE
+	select SND_STM_UNIPERIF_PLAYER
+	select SND_STM_UNIPERIF_READER
+	select SND_STM_CONV_BIPHASE
+	select SND_STM_CONV_DAC_SYSCONF
+	help
+		Select this to get ALSA driver for STih415 chip.
+
+		If you compile this driver as a module, it will be
+		called snd-stm-stih415.ko
+
+config SND_STM_STIH416
+	tristate "STiH416 support"
+	depends on SND_STM
+	default y if MACH_STM_STIH416
+	select SND_STM_AUDIO_GLUE
+	select SND_STM_UNIPERIF_PLAYER
+	select SND_STM_UNIPERIF_READER
+	select SND_STM_CONV_BIPHASE
+	select SND_STM_CONV_DAC_SYSCONF
+	help
+		Select this to get ALSA driver for STiH416 chip.
+
+		If you compile this driver as a module, it will be
+		called snd-stm-stih416.ko
+
+comment "External converters"
+	depends on SND_STM
+
+config SND_STM_CONV_DUMMY
+	tristate "Dummy converter driver"
+	depends on SND_STM
+	help
+		This provides dummy converter driver to configure
+		digital audio interface format (I2S, Left-Justified,
+		Right-Justified). See include/sound/stm.h for
+		more information.
+
+		If compiled as module, it will be called
+		snd-stm-conv-dummy.ko.
+
+config SND_STM_CONV_EPLD
+	tristate "Generic EPLD-controlled converter driver"
+	depends on SND_STM
+	depends on SH_ST_EPLD
+	help
+		This provides generic driver for EPLD-controlled
+		converters. See include/sound/stm.h for informations
+		how to define EPLD offsets & values.
+
+		If compiled as module, it will be called
+		snd-stm-conv-epld.ko.
+
+config SND_STM_CONV_GPIO
+	tristate "Generic GPIO-controlled converter driver"
+	depends on SND_STM
+	help
+		This provides generic driver for GPIO-controlled
+		converters. See include/sound/stm.h for informations
+		how to define GPIO line numbers.
+
+		If compiled as module, it will be called
+		snd-stm-conv-gpio.ko.
+
+config SND_STM_CONV_I2C
+	tristate "Generic I2C-controlled converter driver"
+	depends on SND_STM && I2C
+	help
+		This provides generic driver for I2C-controlled
+		converters. See include/sound/stm.h for informations
+		how to define required I2C addresses & commands.
+
+		If compiled as module, it will be called
+		snd-stm-conv-i2c.ko.
+
+menuconfig SND_STM_TELSS
+	tristate "STMicroelectronics ALSA for TELSS support"
+	depends on SND
+	depends on STM_DRIVERS
+	select SND_PCM
+	select SND_STM
+	select DMADEVICES
+	select STM_FDMA
+	help
+		Say Y here for ALSA support for STMicroelectronics TELSS.
+
+comment "Hardware drivers"
+	depends on SND_STM_TELSS
+
+config SND_STM_UNIPERIF_TDM
+	tristate "Uniperipheral TDM driver"
+	depends on SND_STM_TELSS
+	default y
+
+config SND_STM_TELSS_GLUE
+       tristate "TELSS Top Glue driver"
+       depends on SND_STM_TELSS
+       default y

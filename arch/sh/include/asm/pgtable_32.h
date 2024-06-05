@@ -95,11 +95,15 @@
 
 #define _PAGE_PCC_MASK	0xe0000001
 
+#ifndef __ASSEMBLY__
 /* copy the ptea attributes */
 static inline unsigned long copy_ptea_attributes(unsigned long x)
 {
 	return	((x >> 28) & 0xe) | (x & 0x1);
 }
+
+#endif /* !__ASSEMBLY__ */
+
 #endif
 
 /* Mask which drops unused bits from the PTEL value */

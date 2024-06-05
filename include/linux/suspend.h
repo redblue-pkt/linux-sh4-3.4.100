@@ -315,7 +315,11 @@ extern unsigned long get_safe_page(gfp_t gfp_mask);
 
 extern void hibernation_set_ops(const struct platform_hibernation_ops *ops);
 extern int hibernate(void);
+#if defined(CONFIG_HIBERNATION_ON_DISK)
 extern bool system_entering_hibernation(void);
+#else
+static inline bool system_entering_hibernation(void) { return false; }
+#endif
 #else /* CONFIG_HIBERNATION */
 static inline void register_nosave_region(unsigned long b, unsigned long e) {}
 static inline void register_nosave_region_late(unsigned long b, unsigned long e) {}

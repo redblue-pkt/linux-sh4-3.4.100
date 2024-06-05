@@ -104,6 +104,8 @@ struct nand_bbt_descr {
 /* Search good / bad pattern on the first and the second page */
 #define NAND_BBT_SCAN2NDPAGE	0x00008000
 /* Search good / bad pattern on the last page of the eraseblock */
+
+
 #define NAND_BBT_SCANLASTPAGE	0x00010000
 /*
  * Use a flash based bad block table. By default, OOB identifier is saved in
@@ -117,6 +119,10 @@ struct nand_bbt_descr {
  * entire spare area. Must be used with NAND_BBT_USE_FLASH.
  */
 #define NAND_BBT_NO_OOB_BBM	0x00080000
+
+/* Handle STMicroelectronics H/W ECC schemes (boot-mode, AFM4) */
+#define NAND_BBT_SCANSTMBOOTECC	0x00080000
+#define NAND_BBT_SCANSTMAFMECC	0x00100000
 
 /*
  * Flag set by nand_create_default_bbt_descr(), marking that the nand_bbt_descr
@@ -134,6 +140,19 @@ struct nand_bbt_descr {
 #define NAND_SMALL_BADBLOCK_POS		5
 #define NAND_LARGE_BADBLOCK_POS		0
 #define ONENAND_BADBLOCK_POS		0
+
+/*
+ * Factory-programmed bad-block marker (BBM) flags
+ */
+#define NAND_BBM_PAGE_0		0x00000001
+#define NAND_BBM_PAGE_1		0x00000002
+#define NAND_BBM_PAGE_LAST	0x00000004
+#define NAND_BBM_PAGE_LMIN2	0x00000008
+#define NAND_BBM_PAGE_ALL	0x00000010
+#define NAND_BBM_BYTE_OOB_0	0x00000020
+#define NAND_BBM_BYTE_OOB_5	0x00000040
+#define NAND_BBM_BYTE_OOB_ALL	0x00000080
+#define NAND_BBM_BYTE_ALL	0x00000100
 
 /*
  * Bad block scanning errors

@@ -2177,16 +2177,14 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
 static int hub_port_reset(struct usb_hub *hub, int port1,
 			struct usb_device *udev, unsigned int delay, bool warm);
 
-/* Is a USB 3.0 port in the Inactive or Complinance Mode state?
+/* Is a USB 3.0 port in the Inactive
  * Port worm reset is required to recover
  */
 static bool hub_port_warm_reset_required(struct usb_hub *hub, u16 portstatus)
 {
 	return hub_is_superspeed(hub->hdev) &&
 		(((portstatus & USB_PORT_STAT_LINK_STATE) ==
-		  USB_SS_PORT_LS_SS_INACTIVE) ||
-		 ((portstatus & USB_PORT_STAT_LINK_STATE) ==
-		  USB_SS_PORT_LS_COMP_MOD)) ;
+		  USB_SS_PORT_LS_SS_INACTIVE));
 }
 
 static int hub_port_wait_reset(struct usb_hub *hub, int port1,
@@ -2720,6 +2718,45 @@ static int finish_port_resume(struct usb_device *udev)
 }
 
 /*
+ * There are some SS USB devices which take longer time for link training.
+ * XHCI specs 4.19.4 says that when Link training is successful, port
+ * sets CSC bit to 1. So if SW reads port status before successful link
+ * training, then it will not find device to be present.
+ * USB Analyzer log with such buggy devices show that in some cases
+ * device switch on the RX termination after long delay of host enabling
+ * the VBUS. In few other cases it has been seen that device fails to
+ * negotiate link training in first attempt. It has been
+ * reported till now that few devices take as long as 2000 ms to train
+ * the link after host enabling its VBUS and termination. Following
+ * routine implements a 2000 ms timeout for link training. If in a case
+ * link trains before timeout, loop will exit earlier.
+ *
+ * There are some devices which also takes pretty long time (as long as
+ * 15 sec) to show its presence on high speed EHCI port.
+ *
+ * FIXME: If a device was connected before suspend, but was removed
+ * while system was asleep, then the loop in the following routine will
+ * only exit at timeout.
+ *
+ * This routine should only be called when persist is enabled.
+ */
+static int wait_for_device_present(struct usb_device *udev,
+		struct usb_hub *hub, int *port1,
+		u16 *portchange, u16 *portstatus)
+{
+	int status = 0, delay_ms = 0;
+
+	while (delay_ms < 15000) {
+		if (status || *portstatus & USB_PORT_STAT_CONNECTION)
+			break;
+		msleep(20);
+		delay_ms += 20;
+		status = hub_port_status(hub, *port1, portstatus, portchange);
+	}
+	return status;
+}
+
+/*
  * usb_port_resume - re-activate a suspended usb device's upstream port
  * @udev: device to re-activate, not a root hub
  * Context: must be able to sleep; device not locked; pm locks held
@@ -2810,6 +2847,9 @@ int usb_port_resume(struct usb_device *udev, pm_message_t msg)
 	}
 
 	clear_bit(port1, hub->busy_bits);
+	if (udev->persist_enabled)
+		status = wait_for_device_present(udev, hub, &port1, &portchange,
+				&portstatus);
 
 	status = check_port_resume_type(udev,
 			hub, port1, status, portchange, portstatus);
@@ -3695,6 +3735,27 @@ static int hub_handle_remote_wakeup(struct usb_hub *hub, unsigned int port,
 	return connect_change;
 }
 
+#ifdef CONFIG_PM
+static void wait_for_reset_resume(struct usb_device *hdev, int port)
+{
+	struct usb_device *udev;
+	int delay_ms = 0;
+
+	udev = hdev->children[port-1];
+	if (udev && udev->reset_resume) {
+		while (delay_ms < 15000) {
+			if (!udev->reset_resume)
+				break;
+			msleep(20);
+			delay_ms += 20;
+		}
+	}
+}
+#else
+static inline void wait_for_reset_resume(struct usb_device *hdev, int port)
+{}
+#endif
+
 static void hub_events(void)
 {
 	struct list_head *tmp;
@@ -3791,6 +3852,7 @@ static void hub_events(void)
 					!connect_change && !wakeup_change)
 				continue;
 
+			wait_for_reset_resume(hdev, i);
 			ret = hub_port_status(hub, i,
 					&portstatus, &portchange);
 			if (ret < 0)

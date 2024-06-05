@@ -38,6 +38,7 @@ config SUPERH32
 	def_bool ARCH = "sh"
 	select HAVE_KPROBES
 	select HAVE_KRETPROBES
+	select HAVE_KPTRACE
 	select HAVE_IOREMAP_PROT if MMU && !X2TLB
 	select HAVE_FUNCTION_TRACER
 	select HAVE_FTRACE_MCOUNT_RECORD
@@ -50,7 +51,7 @@ config SUPERH32
 	select HAVE_MIXED_BREAKPOINTS_REGS
 	select PERF_EVENTS
 	select ARCH_HIBERNATION_POSSIBLE if MMU
-	select SPARSE_IRQ
+	select SPARSE_IRQ if !CPU_SUBTYPE_ST40
 
 config SUPERH64
 	def_bool ARCH = "sh64"
@@ -83,8 +84,9 @@ config IRQ_PER_CPU
 config GENERIC_GPIO
 	def_bool n
 
-config GENERIC_CALIBRATE_DELAY
-	bool
+config SH_PFC
+	depends on GENERIC_GPIO
+	def_bool y if !CPU_SUBTYPE_ST40
 
 config GENERIC_CLOCKEVENTS
 	def_bool y
@@ -207,6 +209,16 @@ config CPU_SH4
 	select CPU_HAS_FPU if !CPU_SH4AL_DSP
 	select SYS_SUPPORTS_TMU
 	select SYS_SUPPORTS_HUGETLBFS if MMU
+
+config CPU_SUBTYPE_ST40
+	bool
+	select CPU_SH4
+	select STM_DRIVERS
+	select ARCH_SUSPEND_POSSIBLE
+
+config CPU_ST40_300
+	bool
+	select CPU_SUBTYPE_ST40
 
 config CPU_SH4A
 	bool
@@ -403,6 +415,41 @@ config CPU_SUBTYPE_SH4_202
 	bool "Support SH4-202 processor"
 	select CPU_SH4
 
+# ST40 Processor Support
+
+config CPU_SUBTYPE_STIH415
+	bool "Support STiH415 (Orly) processors"
+	select CPU_ST40_300
+	select SUPPORTS_32BIT
+	select SH_ST_SYNOPSYS_PCI if PCI
+	help
+	  Select STIH415 if you have an STiH415 (Orly) CPU.
+
+config CPU_SUBTYPE_STX7108
+	bool "Support STx7108 processors"
+	select CPU_ST40_300
+	select SUPPORTS_32BIT
+	select STM_HAS_MALI
+	help
+	  Select STX7108 if you have an STx7108 CPU.
+
+config CPU_SUBTYPE_STXH205
+	bool "Support STxH205/7 (Lille/Liege) processors"
+	select CPU_ST40_300
+	select SUPPORTS_32BIT
+	help
+	  Select STXH205 if you have an STxH205 (Lille) or STxH207 (Liege)
+	  CPU, or one of the multi-chip module variants:
+	    STxH237 (Cardiff)	integrated single DVB-S2 demod
+	    STxH238 (Newport)	integrated dual DVB-S2 demod
+	    STxH239 (Bristol)	integrated dual DVB-S2 demod
+	    STxH246 (Kourou)
+	    STxH251 (Linate)	integrated DVB-T/DVB-T2/DVB-C demodulator
+	    STxH253 (Firenze)	integrated DVB-T2 demod
+	    STxH261 (Verona)
+	    STxH263 (Venezia)	integrated ISDB-T demod
+	    STxH273 (Palma)	integrated DVB-T, DVB-C demod
+
 # SH-4A Processor Support
 
 config CPU_SUBTYPE_SH7723
@@ -452,6 +499,7 @@ config CPU_SUBTYPE_SH7770
 config CPU_SUBTYPE_SH7780
 	bool "Support SH7780 processor"
 	select CPU_SH4A
+	select SUPPORTS_32BIT
 
 config CPU_SUBTYPE_SH7785
 	bool "Support SH7785 processor"
@@ -459,6 +507,7 @@ config CPU_SUBTYPE_SH7785
 	select CPU_SHX2
 	select ARCH_SPARSEMEM_ENABLE
 	select SYS_SUPPORTS_NUMA
+	select SUPPORTS_32BIT
 	select ARCH_WANT_OPTIONAL_GPIOLIB
 
 config CPU_SUBTYPE_SH7786
@@ -559,6 +608,17 @@ config SH_TIMER_MTU2
 	help
 	  This enables build of the MTU2 timer driver.
 
+config GENERIC_CALIBRATE_DELAY
+	bool "Auto calibration of the BogoMIPS value"
+	default n
+	help
+	  This option will enable the generic code to calculate the
+	  BogoMIPS value, using a timer to measure how fast the CPU
+	  can execute a busy loop.
+
+	  However, the BogoMIPS value can easily be derived from the
+	  CPU frequency, so this normally is not required.
+
 config SH_PCLK_FREQ
 	int "Peripheral clock frequency (in Hz)"
 	depends on SH_CLK_CPG_LEGACY
@@ -578,7 +638,11 @@ config SH_PCLK_FREQ
 	  This is necessary for determining the reference clock value on
 	  platforms lacking an RTC.
 
+config SH_CLK
+	def_bool y if !CPU_SUBTYPE_ST40
+
 config SH_CLK_CPG
+	depends on SH_CLK
 	def_bool y
 
 config SH_CLK_CPG_LEGACY
@@ -609,6 +673,23 @@ config SH_CPU_FREQ
 	  For details, take a look at <file:Documentation/cpu-freq>.
 
 	  If unsure, say N.
+
+config STM_CPU_FREQ
+	tristate "STMicroelectronics CPU Frequency driver"
+	default y
+	select CPU_FREQ_TABLE
+	depends on CPU_FREQ
+	help
+	  This adds the cpufreq driver for STMicroelectronics micro.
+	  For details, take a look at <file:Documentation/cpu-freq>.
+
+config STM_CPU_FREQ_OBSERVE
+	bool "Observe the CPU frequency"
+	default n
+	depends on STM_CPU_FREQ && CPU_FREQ_DEBUG
+	help
+	  Enable this option to program the ClkGenA Observer to route
+	  the sh4_clk on an external pin
 
 endmenu
 
@@ -765,12 +846,25 @@ config HW_PERF_EVENTS
 
 source "drivers/sh/Kconfig"
 
+config CC_STACKPROTECTOR
+	bool "Enable -fstack-protector buffer overflow detection (EXPERIMENTAL)"
+	depends on EXPERIMENTAL
+	help
+	  This option turns on the -fstack-protector GCC feature. This
+	  feature puts, at the beginning of functions, a canary value on
+	  the stack just before the return address, and validates
+	  the value just before actually returning.  Stack based buffer
+	  overflows (that need to overwrite this return address) now also
+	  overwrite the canary, which gets detected and the attack is then
+	  neutralized via a kernel panic.
+	  This feature requires gcc version 4.2 or above.
+
 endmenu
 
 menu "Boot options"
 
 config ZERO_PAGE_OFFSET
-	hex
+	hex "Zero page offset"
 	default "0x00010000" if PAGE_SIZE_64KB || SH_RTS7751R2D || \
 				SH_7751_SOLUTION_ENGINE
 	default "0x00004000" if PAGE_SIZE_16KB || SH_SH03

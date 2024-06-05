@@ -12,6 +12,35 @@
 #ifndef __ASM_SH_UACCESS_32_H
 #define __ASM_SH_UACCESS_32_H
 
+#if !defined(CONFIG_MMU)
+#define __access_ok(addr, size)		\
+	(__addr_ok((addr) + (size)))
+#else /* CONFIG_MMU */
+/*
+ * __access_ok: Check if address with size is OK or not.
+ *
+ * Uhhuh, this needs 33-bit arithmetic. We have a carry..
+ *
+ * sum := addr + size;  carry? --> flag = true;
+ * if (sum >= addr_limit) flag = true;
+ */
+static inline int __access_ok(unsigned long addr, unsigned long size)
+{
+	unsigned long flag, sum;
+
+	__asm__("clrt\n\t"
+		"addc	%3, %1\n\t"
+		"movt	%0\n\t"
+		"cmp/hi	%4, %1\n\t"
+		"rotcl	%0"
+		:"=&r" (flag), "=r" (sum)
+		:"1" (addr), "r" (size),
+		 "r" (current_thread_info()->addr_limit.seg)
+		:"t");
+	return flag == 0;
+}
+#endif /* CONFIG_MMU */
+
 #define __get_user_size(x,ptr,size,retval)			\
 do {								\
 	retval = 0;						\

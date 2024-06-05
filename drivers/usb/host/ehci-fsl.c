@@ -142,20 +142,19 @@ static int usb_hcd_fsl_probe(const struct hc_driver *driver,
 	if (pdata->operating_mode == FSL_USB2_DR_OTG) {
 		struct ehci_hcd *ehci = hcd_to_ehci(hcd);
 
-		ehci->transceiver = usb_get_transceiver();
-		dev_dbg(&pdev->dev, "hcd=0x%p  ehci=0x%p, transceiver=0x%p\n",
-			hcd, ehci, ehci->transceiver);
+		hcd->phy = usb_get_transceiver();
+		dev_dbg(&pdev->dev, "hcd=0x%p  ehci=0x%p, phy=0x%p\n",
+			hcd, ehci, hcd->phy);
 
-		if (ehci->transceiver) {
-			retval = otg_set_host(ehci->transceiver->otg,
+		if (hcd->phy) {
+			retval = otg_set_host(hcd->phy->otg,
 					      &ehci_to_hcd(ehci)->self);
 			if (retval) {
-				if (ehci->transceiver)
-					put_device(ehci->transceiver->dev);
+				usb_put_transceiver(hcd->phy);
 				goto err4;
 			}
 		} else {
-			dev_err(&pdev->dev, "can't find transceiver\n");
+			dev_err(&pdev->dev, "can't find phy\n");
 			retval = -ENODEV;
 			goto err4;
 		}
@@ -191,11 +190,10 @@ static void usb_hcd_fsl_remove(struct usb_hcd *hcd,
 			       struct platform_device *pdev)
 {
 	struct fsl_usb2_platform_data *pdata = pdev->dev.platform_data;
-	struct ehci_hcd *ehci = hcd_to_ehci(hcd);
 
-	if (ehci->transceiver) {
-		otg_set_host(ehci->transceiver->otg, NULL);
-		put_device(ehci->transceiver->dev);
+	if (hcd->phy) {
+		otg_set_host(hcd->phy->otg, NULL);
+		usb_put_transceiver(hcd->phy);
 	}
 
 	usb_remove_hcd(hcd);
@@ -331,28 +329,12 @@ static int ehci_fsl_setup(struct usb_hcd *hcd)
 
 	/* EHCI registers start at offset 0x100 */
 	ehci->caps = hcd->regs + 0x100;
-	ehci->regs = hcd->regs + 0x100 +
-		HC_LENGTH(ehci, ehci_readl(ehci, &ehci->caps->hc_capbase));
-	dbg_hcs_params(ehci, "reset");
-	dbg_hcc_params(ehci, "reset");
-
-	/* cache this readonly data; minimize chip reads */
-	ehci->hcs_params = ehci_readl(ehci, &ehci->caps->hcs_params);
 
 	hcd->has_tt = 1;
 
-	retval = ehci_halt(ehci);
+	retval = ehci_setup(hcd);
 	if (retval)
 		return retval;
-
-	/* data structure init */
-	retval = ehci_init(hcd);
-	if (retval)
-		return retval;
-
-	ehci->sbrn = 0x20;
-
-	ehci_reset(ehci);
 
 	if (of_device_is_compatible(dev->parent->of_node,
 				    "fsl,mpc5121-usb2-dr")) {

@@ -1,0 +1,31 @@
+/*
+ * Copyright (C) 2014 STMicroelectronics Limited.
+ * Author: Giuseppe Condorelli <giuseppe.condorelli@st.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * publishhed by the Free Software Foundation.
+ */
+/dts-v1/;
+
+#include "stih407.dtsi"
+#include "stihxxx-b2120.dtsi"
+
+/ {
+	model = "stih305 B2120";
+	compatible = "st,stih305-b2120", "st,stih305";
+	memory{
+		device_type = "memory";
+		/* 1Gb */
+		reg = <0x40000000 0x40000000>;
+        };
+
+	 soc {
+		/* MMC0 is MMC4.5 / SD3.0 HC */
+		sdhci0:sdhci@09060000 {
+			st,mmc-core-init = <0>; // ARASAN_EMMC_4_5 core config
+			st,mmc-auto-tuning;
+			st,mmc-has-vsense;
+		};
+	 };
+};

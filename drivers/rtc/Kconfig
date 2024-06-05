@@ -7,7 +7,7 @@ config RTC_LIB
 
 menuconfig RTC_CLASS
 	bool "Real Time Clock"
-	default n
+	default y
 	depends on !S390 && !UML
 	select RTC_LIB
 	help
@@ -270,6 +270,34 @@ config RTC_DRV_PCF8583
 
 	  This driver can also be built as a module. If so, the module
 	  will be called rtc-pcf8583.
+
+config  RTC_DRV_M41ST85Y
+	tristate "M41ST85Y (EXPERIMENTAL)"
+	depends on RTC_CLASS && CPU_SUBTYPE_ST40 && (I2C_STM || I2C_ST40_PIO) && EXPERIMENTAL
+	help
+	  Enable this entry to support the external M41ST85Y Real Time Clock
+	  device series roundly fitted on some I2C serial bus interface seeng that
+	  nothing board have one.
+
+config RTC_DRV_M41ST85Y_IRQPIO
+	depends on RTC_DRV_M41ST85Y
+	hex "IRQ PIO value"
+	default "0xff"
+	help
+	  This set the PIO pin to be use as RTC-IRQ line.
+	  Addressing syntax is [7:Not used:7][6:PIO-Port:3][2:PIO-Pin:0]
+	  For example, an address of 0x0F represents PIO1[7]. Default is
+	  an invalid value.
+
+config RTC_DRV_M41ST85Y_SQWPIO
+	depends on RTC_DRV_M41ST85Y
+	hex "SQW PIO value"
+	default "0xff"
+	help
+	  This set the PIO pin to be use as RTC-SQW line.
+	  Addressing syntax is [7:Not used:7][6:PIO-Port:3][2:PIO-Pin:0]
+	  For example, an address of 0x07 represents PIO0[7]. Default is
+	  an invalid value.
 
 config RTC_DRV_M41T80
 	tristate "ST M41T62/65/M41T80/81/82/83/84/85/87"
@@ -1003,6 +1031,29 @@ config RTC_DRV_PCAP
 	help
 	  If you say Y here you will get support for the RTC found on
 	  the PCAP2 ASIC used on some Motorola phones.
+
+config RTC_DRV_STM_LPC
+	tristate "STMicroelectronics LPC RTC device driver"
+	depends on CPU_SUBTYPE_ST40 || ARM && ARCH_STM
+	default y
+	help
+	  If you say yes here you get support for the
+	  STMicroelectronics Low Power Controller (LPC) based RTC.
+
+	  This driver can also be built as a module. If so, the module
+	  will be called rtc-stm-lpc.
+
+config RTC_DRV_STM_SBC
+	tristate "STMicroelectronics SBC RTC device driver"
+	depends on (CPU_SUBTYPE_ST40 || ARCH_STM) && STM_LPM
+	default n
+	help
+	  If you say yes here you get support for the
+	  STMicroelectronics Standby Controller (SBC) based RTC.
+
+	  This driver can also be built as a module. If so, the module
+	  will be called rtc-stm-sbc.
+
 
 config RTC_DRV_MC13XXX
 	depends on MFD_MC13XXX

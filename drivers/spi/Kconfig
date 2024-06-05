@@ -355,6 +355,15 @@ config SPI_STMP3XXX
 	help
 	  SPI driver for Freescale STMP37xx/378x SoC SSP interface
 
+config SPI_STM
+	tristate "STMicroelectronics SPI SSC-based driver"
+	depends on STM_DRIVERS
+	select SPI_BITBANG
+	help
+	  STMicroelectronics SoCs support for SPI.
+	  If you say yes to this option, support will be included for the
+	  SSC driven SPI.
+
 config SPI_TEGRA
 	tristate "Nvidia Tegra SPI controller"
 	depends on ARCH_TEGRA && TEGRA_SYSTEM_DMA

@@ -11,16 +11,6 @@
 #define __addr_ok(addr) \
 	((unsigned long __force)(addr) < current_thread_info()->addr_limit.seg)
 
-/*
- * __access_ok: Check if address with size is OK or not.
- *
- * Uhhuh, this needs 33-bit arithmetic. We have a carry..
- *
- * sum := addr + size;  carry? --> flag = true;
- * if (sum >= addr_limit) flag = true;
- */
-#define __access_ok(addr, size)		\
-	(__addr_ok((addr) + (size)))
 #define access_ok(type, addr, size)	\
 	(__chk_user_ptr(addr),		\
 	 __access_ok((unsigned long __force)(addr), (size)))

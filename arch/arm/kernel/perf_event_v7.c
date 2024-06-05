@@ -1057,7 +1057,7 @@ static irqreturn_t armv7pmu_handle_irq(int irq_num, void *dev)
 {
 	u32 pmnc;
 	struct perf_sample_data data;
-	struct pmu_hw_events *cpuc;
+	struct pmu_hw_events *cpuc  = (struct pmu_hw_events *)dev;
 	struct pt_regs *regs;
 	int idx;
 
@@ -1079,7 +1079,6 @@ static irqreturn_t armv7pmu_handle_irq(int irq_num, void *dev)
 
 	perf_sample_data_init(&data, 0);
 
-	cpuc = &__get_cpu_var(cpu_hw_events);
 	for (idx = 0; idx < cpu_pmu->num_events; ++idx) {
 		struct perf_event *event = cpuc->events[idx];
 		struct hw_perf_event *hwc;

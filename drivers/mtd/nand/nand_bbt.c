@@ -135,13 +135,44 @@ static int check_short_pattern(uint8_t *buf, struct nand_bbt_descr *td)
 {
 	int i;
 	uint8_t *p = buf;
+	int ooblen, e = 0;
 
 	/* Compare the pattern */
 	for (i = 0; i < td->len; i++) {
 		if (p[td->offs + i] != td->pattern[i])
-			return -1;
+			goto check_stm_ecc;
 	}
 	return 0;
+
+ check_stm_ecc:
+	/* Potential bad-block... */
+	if (td->options & NAND_BBT_SCANSTMBOOTECC) {
+		/* Check for STM boot-mode ECC... */
+		ooblen = (td->offs == 5) ? 16 : 64;
+		e = 0;
+		for (i = 3; i < ooblen; i += 4)
+			e += hweight8(buf[i] ^ 'B');
+
+		/* Tolerate a single bit-error accross 'B' markers */
+		if (e <= 1)
+			return 0;
+	}
+	if (td->options & NAND_BBT_SCANSTMAFMECC) {
+		/* Check for STM AFM ECC... */
+		ooblen = (td->offs == 5) ? 16 : 64;
+		e = 0;
+		for (i = 3; i < ooblen; i += 16) {
+			e += hweight8(buf[i]   ^ 'A');
+			e += hweight8(buf[i+1] ^ 'F');
+			e += hweight8(buf[i+2] ^ 'M');
+		}
+		/* Tolerate a single bit-error accross 'AFM' markers */
+		if (e <= 1)
+			return 0;
+	}
+
+	/* Bad-block confirmed! */
+	return -1;
 }
 
 /**
@@ -1234,6 +1265,7 @@ int nand_update_bbt(struct mtd_info *mtd, loff_t offs)
 	kfree(buf);
 	return res;
 }
+EXPORT_SYMBOL_GPL(nand_update_bbt);
 
 /*
  * Define some generic bad / good block scan pattern which are used
@@ -1290,6 +1322,28 @@ static struct nand_bbt_descr bbt_mirror_no_bbt_descr = {
 		| NAND_BBT_NO_OOB,
 	.len = 4,
 	.veroffs = 4,
+	.maxblocks = 4,
+	.pattern = mirror_pattern
+};
+
+
+/* BBT descriptors for (Micron) 4-bit on-die ECC */
+static struct nand_bbt_descr bbt_main_descr_ode = {
+	.options = NAND_BBT_LASTBLOCK | NAND_BBT_CREATE | NAND_BBT_WRITE
+	| NAND_BBT_2BIT | NAND_BBT_VERSION | NAND_BBT_PERCHIP,
+	.offs =	8 + 8,		/* need to shift by 8 due to on-die ECC */
+	.len = 4,
+	.veroffs = 12 + 8,	/* need to shift by 8 due to on-die ECC */
+	.maxblocks = 4,
+	.pattern = bbt_pattern
+};
+
+static struct nand_bbt_descr bbt_mirror_descr_ode = {
+	.options = NAND_BBT_LASTBLOCK | NAND_BBT_CREATE | NAND_BBT_WRITE
+		| NAND_BBT_2BIT | NAND_BBT_VERSION | NAND_BBT_PERCHIP,
+	.offs =	8 + 8,		/* need to shift by 8 due to on-die ECC */
+	.len = 4,
+	.veroffs = 12 + 8,	/* need to shift by 8 due to on-die ECC */
 	.maxblocks = 4,
 	.pattern = mirror_pattern
 };
@@ -1357,6 +1411,9 @@ int nand_default_bbt(struct mtd_info *mtd)
 			if (this->bbt_options & NAND_BBT_NO_OOB) {
 				this->bbt_td = &bbt_main_no_bbt_descr;
 				this->bbt_md = &bbt_mirror_no_bbt_descr;
+			} else if (this->ecc.mode == NAND_ECC_4BITONDIE) {
+				this->bbt_td = &bbt_main_descr_ode;
+				this->bbt_md = &bbt_mirror_descr_ode;
 			} else {
 				this->bbt_td = &bbt_main_descr;
 				this->bbt_md = &bbt_mirror_descr;
@@ -1403,6 +1460,9 @@ int nand_isbad_bbt(struct mtd_info *mtd, loff_t offs, int allowbbt)
 	}
 	return 1;
 }
+EXPORT_SYMBOL_GPL(nand_isbad_bbt);
 
 EXPORT_SYMBOL(nand_scan_bbt);
 EXPORT_SYMBOL(nand_default_bbt);
+
+#include "stm_nand_bbt.c"

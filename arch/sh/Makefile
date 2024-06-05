@@ -17,6 +17,7 @@ isa-$(CONFIG_CPU_SH3)			:= sh3
 isa-$(CONFIG_CPU_SH4)			:= sh4
 isa-$(CONFIG_CPU_SH4A)			:= sh4a
 isa-$(CONFIG_CPU_SH4AL_DSP)		:= sh4al
+isa-$(CONFIG_CPU_ST40_300)		:= st40-300
 isa-$(CONFIG_CPU_SH5)			:= shmedia
 
 ifeq ($(CONFIG_SUPERH32),y)
@@ -33,6 +34,8 @@ cflags-$(CONFIG_CPU_SH4)		:= $(call cc-option,-m4,) \
 cflags-$(CONFIG_CPU_SH4A)		+= $(call cc-option,-m4a,) \
 					   $(call cc-option,-m4a-nofpu,)
 cflags-$(CONFIG_CPU_SH4AL_DSP)		+= $(call cc-option,-m4al,)
+cflags-$(CONFIG_CPU_ST40_300)		+= $(call cc-option,-m4-300,) \
+					   $(call cc-option,-m4-300-nofpu,)
 cflags-$(CONFIG_CPU_SH5)		:= $(call cc-option,-m5-32media-nofpu,)
 
 ifeq ($(cflags-y),)
@@ -150,6 +153,62 @@ machdir-$(CONFIG_SH_LBOX_RE2)			+= mach-lboxre2
 machdir-$(CONFIG_SH_CAYMAN)			+= mach-cayman
 machdir-$(CONFIG_SH_RSK)			+= mach-rsk
 
+# ST Boards
+machdir-$(CONFIG_SH_ST_ADI7108)			+= mach-adi7108
+machdir-$(CONFIG_SH_ST_B2000)			+= mach-b2000
+machdir-$(CONFIG_SH_ST_B2039)			+= mach-b2039
+machdir-$(CONFIG_SH_ST_B2057)			+= mach-b2057
+machdir-$(CONFIG_SH_ST_B2064)			+= mach-b2064
+machdir-$(CONFIG_SH_ST_B2066)			+= mach-b2066
+machdir-$(CONFIG_SH_ST_B2067)			+= mach-b2067
+machdir-$(CONFIG_SH_ST_B2157)                   += mach-b2157
+machdir-$(CONFIG_SH_ST_B2075)			+= mach-b2075
+machdir-$(CONFIG_SH_ST_B2076)			+= mach-b2076
+machdir-$(CONFIG_SH_ST_B2108)                   += mach-b2108
+machdir-$(CONFIG_SH_ST_B2141)			+= mach-b2141
+machdir-$(CONFIG_SH_ST_B2175)			+= mach-b2175
+machdir-$(CONFIG_SH_ST_B2176)			+= mach-b2176
+machdir-$(CONFIG_SH_ST_B2146)			+= mach-b2146
+machdir-$(CONFIG_SH_ST_CAB5197)			+= mach-cab5197
+machdir-$(CONFIG_SH_ST_EUD7141)			+= mach-eud7141
+machdir-$(CONFIG_SH_ST_FLDB)			+= mach-fldb
+machdir-$(CONFIG_SH_ST_FUDB)			+= mach-fudb
+machdir-$(CONFIG_SH_ST_HDK5289)			+= mach-hdk5289
+machdir-$(CONFIG_SH_ST_DTT5250)			+= mach-dtt5250
+machdir-$(CONFIG_SH_ST_HDK5250)			+= mach-hdk5250
+machdir-$(CONFIG_SH_ST_HDK7105)			+= mach-hdk7105
+machdir-$(CONFIG_SH_ST_HDKH225)			+= mach-hdkh225
+machdir-$(CONFIG_SH_ST_HDKH246)			+= mach-hdkh246
+machdir-$(CONFIG_SH_ST_HDKH251)			+= mach-hdkh251
+machdir-$(CONFIG_SH_ST_HDK7106)			+= mach-hdk7106
+machdir-$(CONFIG_SH_ST_HDK7108)			+= mach-hdk7108
+machdir-$(CONFIG_SH_ST_HDK7111)			+= mach-hdk7111
+machdir-$(CONFIG_SH_ST_HDK7197)			+= mach-hdk7197
+machdir-$(CONFIG_SH_ST_HDREF)			+= mach-hdref
+machdir-$(CONFIG_SH_ST_HMP7100)			+= mach-hmp7100
+machdir-$(CONFIG_SH_ST_HMP7105)			+= mach-hmp7105
+machdir-$(CONFIG_SH_ST_HMS1)			+= mach-hms1
+machdir-$(CONFIG_SH_ST_IPTV7105)		+= mach-iptv7105
+machdir-$(CONFIG_SH_ST_NGB7167)			+= mach-ngb7167
+machdir-$(CONFIG_SH_ST_SAT7111)			+= mach-sat7111
+machdir-$(CONFIG_SH_ST_MB360)			+= mach-mb360 mach-st
+machdir-$(CONFIG_SH_ST_MB374)			+= mach-mb374 mach-st
+machdir-$(CONFIG_SH_ST_MB411)			+= mach-mb411 mach-st
+machdir-$(CONFIG_SH_ST_MB442)			+= mach-mb442
+machdir-$(CONFIG_SH_ST_MB448)			+= mach-mb448
+machdir-$(CONFIG_SH_ST_MB519)			+= mach-mb519 mach-st
+machdir-$(CONFIG_SH_ST_MB602)			+= mach-mb602
+machdir-$(CONFIG_SH_ST_MB618)			+= mach-mb618 mach-st
+machdir-$(CONFIG_SH_ST_MB628)			+= mach-mb628 mach-st
+machdir-$(CONFIG_SH_ST_MB671)			+= mach-mb671 mach-st
+machdir-$(CONFIG_SH_ST_MB680)			+= mach-mb680 mach-st
+machdir-$(CONFIG_SH_ST_MB704)			+= mach-mb704
+machdir-$(CONFIG_SH_ST_MB796)			+= mach-mb796 mach-st
+machdir-$(CONFIG_SH_ST_7102ISDB)		+= mach-7102isdb
+machdir-$(CONFIG_SH_ST_MB837)			+= mach-mb837 mach-st
+machdir-$(CONFIG_SH_ST_MB839)			+= mach-mb839
+machdir-$(CONFIG_SH_ST_MB903)			+= mach-mb903
+
 ifneq ($(machdir-y),)
 core-y	+= $(addprefix arch/sh/boards/, \
 	     $(filter-out ., $(patsubst %,%/,$(machdir-y))))
@@ -197,6 +256,10 @@ endif
 
 ifeq ($(CONFIG_DWARF_UNWINDER),y)
   KBUILD_CFLAGS += -fasynchronous-unwind-tables
+endif
+
+ifeq ($(CONFIG_CC_STACKPROTECTOR),y)
+  KBUILD_CFLAGS += -fstack-protector
 endif
 
 libs-$(CONFIG_SUPERH32)		:= arch/sh/lib/	$(libs-y)

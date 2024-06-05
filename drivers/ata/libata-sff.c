@@ -697,7 +697,7 @@ EXPORT_SYMBOL_GPL(ata_sff_data_xfer_noirq);
  */
 static void ata_pio_sector(struct ata_queued_cmd *qc)
 {
-	int do_write = (qc->tf.flags & ATA_TFLAG_WRITE);
+	int do_write = (qc->tf.flags & ATA_TFLAG_WRITE) ? WRITE : READ;
 	struct ata_port *ap = qc->ap;
 	struct page *page;
 	unsigned int offset;
@@ -2123,17 +2123,19 @@ EXPORT_SYMBOL_GPL(sata_sff_hardreset);
 void ata_sff_postreset(struct ata_link *link, unsigned int *classes)
 {
 	struct ata_port *ap = link->ap;
+	unsigned int slave_possible = ap->flags & ATA_FLAG_SLAVE_POSS;
 
 	ata_std_postreset(link, classes);
 
 	/* is double-select really necessary? */
 	if (classes[0] != ATA_DEV_NONE)
 		ap->ops->sff_dev_select(ap, 1);
-	if (classes[1] != ATA_DEV_NONE)
+	if (classes[1] != ATA_DEV_NONE && slave_possible)
 		ap->ops->sff_dev_select(ap, 0);
 
 	/* bail out if no device is present */
-	if (classes[0] == ATA_DEV_NONE && classes[1] == ATA_DEV_NONE) {
+	if (classes[0] == ATA_DEV_NONE &&
+	    (!slave_possible || classes[1] == ATA_DEV_NONE)) {
 		DPRINTK("EXIT, no device\n");
 		return;
 	}

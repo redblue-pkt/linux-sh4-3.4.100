@@ -92,6 +92,8 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 #define NAND_CMD_READID		0x90
 #define NAND_CMD_ERASE2		0xd0
 #define NAND_CMD_PARAM		0xec
+#define NAND_CMD_GETFEATURES    0xee
+#define NAND_CMD_SETFEATURES    0xef
 #define NAND_CMD_RESET		0xff
 
 #define NAND_CMD_LOCK		0x2a
@@ -124,12 +126,16 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 
 #define NAND_CMD_NONE		-1
 
+/* Feature Addresses (for the "SET/GET FEATURES" commands) */
+#define NAND_FEATURE_MICRON_ARRAY_OP_MODE	0x90
+
 /* Status bits */
 #define NAND_STATUS_FAIL	0x01
 #define NAND_STATUS_FAIL_N1	0x02
 #define NAND_STATUS_TRUE_READY	0x20
 #define NAND_STATUS_READY	0x40
 #define NAND_STATUS_WP		0x80
+#define NAND_STATUS_ECCREWRITE	0x08
 
 /*
  * Constants for ECC_MODES
@@ -140,6 +146,7 @@ typedef enum {
 	NAND_ECC_HW,
 	NAND_ECC_HW_SYNDROME,
 	NAND_ECC_HW_OOB_FIRST,
+	NAND_ECC_4BITONDIE,
 	NAND_ECC_SOFT_BCH,
 } nand_ecc_modes_t;
 
@@ -201,6 +208,17 @@ typedef enum {
 
 /* Device behaves just like nand, but is readonly */
 #define NAND_ROM		0x00000800
+
+/* Device supports cache read function */
+#define NAND_CACHERD		0x00001000
+/* Device supports multi-plane read operations */
+#define NAND_MULTIPLANE_READ	0x00002000
+/* Deivce supports multi-plane program/erase operations */
+#define NAND_MULTIPLANE_PROG_ERASE	0x00004000
+/* Deivce supports multi-LUN operations */
+#define NAND_MULTILUN		0x00008000
+/* Micron '4-bit On-die ECC' device */
+#define NAND_MICRON_4BITONDIEECC	0x00080000
 
 /* Options valid for Samsung large page devices */
 #define NAND_SAMSUNG_LP_OPTIONS \
@@ -300,6 +318,40 @@ struct nand_onfi_params {
 } __attribute__((packed));
 
 #define ONFI_CRC_BASE	0x4F4E
+
+/*
+ * NAND Device Timing Specification
+ *
+ * All values in nano seconds, except where specified.
+ */
+struct nand_timing_spec {
+	int	tR;		/* Max Page Read delay [us]*/
+	int	tCLS;		/* Min CLE setup time */
+	int	tCS;		/* Min CE setup time */
+	int	tALS;		/* Min ALE setup time */
+	int	tDS;		/* Min Data setup time */
+	int	tWP;		/* Min WE pulse width */
+	int	tCLH;		/* Min CLE hold time */
+	int	tCH;		/* Min CE hold time */
+	int	tALH;		/* Min ALE hold time */
+	int	tDH;		/* Min Data hold time */
+	int	tWB;		/* Max WE high to busy */
+	int	tWH;		/* Min WE hold time */
+	int	tWC;		/* Min Write cycle time */
+	int	tRP;		/* Min RE pulse width */
+	int	tREH;		/* Min RE high hold time */
+	int	tRC;		/* Min Read cycle time */
+	int	tREA;		/* Max Read access time */
+	int	tRHOH;		/* Min RE high to output hold */
+	int	tCEA;		/* Max CE access time */
+	int	tCOH;		/* Min CE high to output hold */
+	int	tCHZ;		/* Max CE high to output high Z */
+	int	tCSD;		/* Min CE high to ALE/CLE don't care */
+};
+
+/* ONFI define 6 timing modes */
+#define NAND_ONFI_TIMING_MODES		6
+extern struct nand_timing_spec nand_onfi_timing_specs[];
 
 /**
  * struct nand_hw_control - Control structure for hardware controller (e.g ECC generator) shared among independent devices
@@ -445,6 +497,7 @@ struct nand_buffers {
  * @bbt_options:	[INTERN] bad block specific options. All options used
  *			here must come from bbm.h. By default, these options
  *			will be copied to the appropriate nand_bbt_descr's.
+ * @bbm:		[INTERN] Bad block marker flags (see bbm.h).
  * @badblockpos:	[INTERN] position of the bad block marker in the oob
  *			area.
  * @badblockbits:	[INTERN] minimum number of set bits in a good block's
@@ -507,6 +560,7 @@ struct nand_chip {
 	int chip_delay;
 	unsigned int options;
 	unsigned int bbt_options;
+	unsigned int bbm;
 
 	int page_shift;
 	int phys_erase_shift;
@@ -520,6 +574,8 @@ struct nand_chip {
 	uint8_t cellinfo;
 	int badblockpos;
 	int badblockbits;
+	int planes_per_chip;
+	int luns_per_chip;
 
 	int onfi_version;
 	struct nand_onfi_params	onfi_params;
@@ -590,6 +646,11 @@ struct nand_manufacturers {
 
 extern struct nand_flash_dev nand_flash_ids[];
 extern struct nand_manufacturers nand_manuf_ids[];
+extern int nand_decode_readid(struct mtd_info *mtd, struct nand_chip *chip,
+			      struct nand_flash_dev *type, uint8_t *id,
+			      int max_id_len);
+extern void nand_derive_bbm(struct mtd_info *mtd, struct nand_chip *chip,
+			    uint8_t *id);
 
 extern int nand_scan_bbt(struct mtd_info *mtd, struct nand_bbt_descr *bd);
 extern int nand_update_bbt(struct mtd_info *mtd, loff_t offs);
@@ -599,6 +660,20 @@ extern int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 			   int allowbbt);
 extern int nand_do_read(struct mtd_info *mtd, loff_t from, size_t len,
 			size_t *retlen, uint8_t *buf);
+extern int nand_get_device(struct nand_chip *chip,
+			   struct mtd_info *mtd, int new_state);
+extern void nand_release_device(struct mtd_info *mtd);
+extern int nand_suspend(struct mtd_info *mtd);
+extern void nand_resume(struct mtd_info *mtd);
+extern void nand_sync(struct mtd_info *mtd);
+extern uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
+				  struct mtd_oob_ops *ops, size_t len);
+extern int nand_check_wp(struct mtd_info *mtd);
+extern uint8_t *nand_fill_oob(struct mtd_info *mtd, uint8_t *oob, size_t len,
+			      struct mtd_oob_ops *ops);
+extern int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
+			     struct mtd_oob_ops *ops);
+extern u8 nand_erasebb;
 
 /**
  * struct platform_nand_chip - chip level device structure

@@ -1,0 +1,181 @@
+/*
+ * Copyright (C) 2013 STMicroelectronics Limited.
+ * Author: Nunzio Raciti <nunzio.raciti@st.com>
+ * Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * publishhed by the Free Software Foundation.
+ */
+
+/ {
+	memory{
+		device_type = "memory";
+		reg = <0x40000000 0x10000000>;
+	};
+
+	chosen {
+		bootargs = "";
+		linux,stdout-path = &uart2;
+	};
+
+	aliases {
+		/* UART2 - JST_XH4 */
+		ttyAS0 = &uart2;
+		usb0	= &usb0;
+	};
+
+	soc {
+		/* USB - CN5 */
+		usb0: usb@fe800000{
+			status = "okay";
+		};
+
+		uart2:uart@fe532000{
+			status = "okay";
+		};
+
+		leds {
+			compatible	= "gpio-leds";
+			led_wifi_wps {
+				label	= "LED_WIFI_WPS";
+				gpios	= <&PIO19 2 1>;
+				default-state = "off";
+			};
+			led_ctr_pwr {
+				label	= "LED_CTR_PWR";
+				gpios	= <&PIO19 3 1>;
+				default-state = "off";
+			};
+			led_ctr_us {
+				label	= "LED_CTR_US";
+				gpios	= <&PIO19 4 1>;
+				default-state = "off";
+			};
+			led_ctr_online {
+				label	= "LED_CTR_ONLINE";
+				gpios	= <&PIO19 5 1>;
+				default-state = "off";
+			};
+			led_ctr_ds {
+				label	= "LED_CTR_DS";
+				gpios	= <&PIO19 6 1>;
+				default-state = "off";
+			};
+			led_ctr_link {
+				label	= "LED_CTR_LINK";
+				gpios	= <&PIO19 7 1>;
+				default-state = "off";
+			};
+		};
+
+		gpio_keys {
+			compatible = "gpio-keys";
+			button_wifi_wps {
+				label = "BUTTON_WIFI_WPS";
+				linux,code = <122>;
+				gpios = <&PIO8 6 0>;
+			};
+		};
+
+		/* AVS_PWM */
+		pwm0: pwm@fe510000{
+			status = "okay";
+			pwm-channel@0 {
+				status = "okay";
+			};
+		};
+
+		spifsm: spifsm@fe302000 {
+			status = "okay";
+			flash-name = "n25q512";
+			partitions = <&b2147_fsm_partitions>;
+
+			b2147_fsm_partitions: partitions-b2147 {
+				#address-cells = <1>;
+				#size-cells = <1>;
+				partition@0 {
+					label = "boot";
+					reg = <0x00000000 0x01e00000>; /* 30 MB */
+				};
+				partition@1e00000 {
+					label = "nvm";
+					reg = <0x01e00000 0x00100000>;  /* 1 MB */
+				};
+				partition@1f00000 {
+					label = "rest";             /* presently unused */
+					reg = <0x01f00000 0x02100000>;
+				};
+			};
+		};
+
+		miphy0: miphy@fef24000 {
+			status = "okay";
+			miphy-modes	= "pcie";
+		};
+
+		pcie0: pcie@fef20000{
+			status = "okay";
+		};
+
+		miphy1: miphy@fef34000 {
+			status = "okay";
+			miphy-modes	= "pcie";
+		};
+
+		pcie1: pcie@fef30000{
+			status = "okay";
+		};
+		stmfp:ethernet@fee80000 {
+			status = "okay";
+			device-config = <&fprgmii_dev_config>;
+			phy-mode = "rgmii";
+
+			fpdocsis{
+				st,phy-bus-name = "fixed";
+				st,phy-bus-id = <0>;
+				st,phy-addr = <2>;
+			};
+
+			fpgige0{
+				st,phy-bus-name = "fixed";
+				st,phy-bus-id = <0>;
+				st,phy-addr = <3>;
+			};
+
+			fpgige1{
+				st,phy-bus-name = "fixed";
+				st,phy-bus-id = <0>;
+				st,phy-addr = <1>;
+			};
+		};
+
+		realtek: rtl8367rb {
+			compatible	= "realtek,rtl8367rb";
+			gpio-sck	= <&PIO12 6 0>;
+			gpio-sda	= <&PIO12 5 0>;
+			gpio-reset	= <&PIO21 3 0>;
+
+			rtl8367rb,extif1;
+			rtl8367rb,extif1-mode = <1>;	// RGMII
+			rtl8367rb,extif1-txdelay = <0>;
+			rtl8367rb,extif1-rxdelay = <1>;
+			rtl8367rb,extif1-force_mode = <1>;
+			rtl8367rb,extif1-txpause = <1>;
+			rtl8367rb,extif1-rxpause = <1>;
+			rtl8367rb,extif1-link = <1>;
+			rtl8367rb,extif1-duplex = <1>;
+			rtl8367rb,extif1-speed = <2>;
+
+			rtl8367rb,extif2;
+			rtl8367rb,extif2-mode = <1>;	// RGMII
+			rtl8367rb,extif2-txdelay = <0>;
+			rtl8367rb,extif2-rxdelay = <1>;
+			rtl8367rb,extif2-force_mode = <1>;
+			rtl8367rb,extif2-txpause = <1>;
+			rtl8367rb,extif2-rxpause = <1>;
+			rtl8367rb,extif2-link = <1>;
+			rtl8367rb,extif2-duplex = <1>;
+			rtl8367rb,extif2-speed = <2>;
+		};
+	};
+};

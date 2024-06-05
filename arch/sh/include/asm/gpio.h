@@ -15,6 +15,10 @@
 #include <linux/kernel.h>
 #include <linux/errno.h>
 
+#if defined(CONFIG_STM_DRIVERS)
+#include <linux/stm/gpio.h>
+#else
+
 #if defined(CONFIG_CPU_SH3)
 #include <cpu/gpio.h>
 #endif
@@ -50,5 +54,7 @@ static inline int irq_to_gpio(unsigned int irq)
 }
 
 #endif /* CONFIG_GPIOLIB */
+
+#endif /* CONFIG_STM_DRIVERS */
 
 #endif /* __ASM_SH_GPIO_H */

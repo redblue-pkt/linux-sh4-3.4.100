@@ -259,6 +259,37 @@ config DMA_SA11X0
 	  SA-1110 SoCs.  This DMA engine can only be used with on-chip
 	  devices.
 
+config STM_FDMA
+	bool "STMicroelectronics FDMA dmaengine support"
+	select DMA_ENGINE
+	select LIBELF_32
+	help
+	  Enable dmaengine support for the STMicroelectronics FDMA controller.
+
+config STM_FDMA_AUDIO
+	bool "STMicroelectronics FDMA dmaengine audio extensions"
+	depends on STM_FDMA
+	default y
+	help
+	  Enable audio extensions support for STMicroelectronics FDMA dmaengine
+	  implementation.
+
+config STM_FDMA_MCHI
+	bool "STMicroelectronics FDMA dmaengine MCHI extensions"
+	depends on STM_FDMA
+	default y
+	help
+	  Enable MCHI extensions support for STMicroelectronics FDMA dmaengine
+	  implementation.
+
+config STM_FDMA_TELSS
+	bool "STMicroelectronics FDMA dmaengine TELSS extensions"
+	depends on STM_FDMA
+	default y
+	help
+	  Enable TELSS extensions support for STMicroelectronics FDMA dmaengine
+	  implementation.
+
 config DMA_ENGINE
 	bool
 

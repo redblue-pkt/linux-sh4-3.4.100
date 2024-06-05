@@ -26,6 +26,18 @@ void (*pm_idle)(void);
 
 static int hlt_counter;
 
+void disable_hlt(void)
+{
+        hlt_counter++;
+}
+EXPORT_SYMBOL(disable_hlt);
+
+void enable_hlt(void)
+{
+        hlt_counter--;
+}
+EXPORT_SYMBOL(enable_hlt);
+
 static int __init nohlt_setup(char *__unused)
 {
 	hlt_counter = 1;

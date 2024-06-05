@@ -25,8 +25,14 @@
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 #include <asm/fpu.h>
+#include <asm/watchdog.h>
 #include <asm/syscalls.h>
 #include <asm/switch_to.h>
+
+#ifdef CONFIG_CC_STACKPROTECTOR
+unsigned long __stack_chk_guard __read_mostly;
+EXPORT_SYMBOL(__stack_chk_guard);
+#endif
 
 void show_regs(struct pt_regs * regs)
 {
@@ -219,6 +225,10 @@ __notrace_funcgraph struct task_struct *
 __switch_to(struct task_struct *prev, struct task_struct *next)
 {
 	struct thread_struct *next_t = &next->thread;
+
+#if defined CONFIG_CC_STACKPROTECTOR && !defined CONFIG_SMP
+	__stack_chk_guard = next->stack_canary;
+#endif
 
 	unlazy_fpu(prev, task_pt_regs(prev));
 

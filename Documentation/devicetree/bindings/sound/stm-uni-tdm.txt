@@ -1,0 +1,148 @@
+===============================================================================
+			stm uniperipheral tdm
+===============================================================================
+
+Required properties:
+- compatible		: Should be "st,snd_uni_tdm"
+- reg, reg-names, interrupts, interrupt-names	: Standard way to define device
+			resources with names. look in
+			Documentation/devicetree/bindings/resource-names.txt
+- padcfg-names		: Pad configuration name
+- padcfg-0		: Pad configuration
+- description		: TDM name
+- version		: IP version
+- card-device		: ALSA card sub-device id (set to 0xffffffff)
+- fdma-name		: Name of FDMA serving this TDM
+- fdma-channel		: Channel of FDMA serving this TDM
+- fdma-initiator	: Initiator type
+- fdma-direction	: Direction of transfer (DMA_MEM_TO_DEV/DMA_DEV_TO_MEM)
+- fdma-direct-conn	: Request line is a direct connection
+- fdma-request-line	: Request line used by FDMA
+- rising-edge		: Data on rising edge (1) or falling edge (0)
+- clk-rate		: Player only - clock rate in Hz
+- frame-count		: Frames per audio period (must be a multiple of 8)
+- max-periods		: Maximum audio periods
+- hw-config		: TELSS device (e.g. Lantiq DuSlic) configuration
+
+Hardware configuration:
+- pclk-rate		: Player only - PCLK rate in Hz
+- fs-rate		: Player only - FS REF rate in Hz
+- fs-divider		: Timeslots per FS REF
+- fs01-rate		: Player only - FS01 rate in Hz
+- fs02-rate		: Player only - FS02 rate in Hz
+- fs02-delay-clock	: Player only - FS02 delay from FS01
+- fs02-delay-timeslot	: Player only - FS02 delay from FS01
+- msbit-start		: Timslot start position
+- timslot-info		: Timeslot information
+- frame-size		: Frame size in 32-bit words
+- handset-count		: Number of handsets
+- handset-info		: Handset information
+
+Handset information:
+- fsync			: Handset fsync rate in Hz
+- slot1			: Slot 1 ID
+- slot2			: Slot 2 ID
+- slot2-valid		: Slot 2 in use
+- duplicate		: Duplicate bit
+- data16		: Data size (0 = 8-bit, 1 = 16-bit)
+- cnb			: Compressed Narrowband support
+- lnb			: Linear Narrowband support
+- cwb			: Compressed Wideband support
+- lwb			: Linear Wideband support
+
+
+Typical usage example:
+
+snd_tdm_handset_info: snd-tdm-handset-info {
+	handset0 {
+		fsync	= <8000>;
+		slot1	= <0>;
+		slot2	= <2>;
+		slot2-valid = <0>;
+		duplicate = <0>;
+		data16	= <0>;
+		cnb	= <1>;
+		lnb	= <1>;
+		cwb	= <0>;
+		lwb	= <1>;
+	};
+	handset1 {
+		fsync	= <8000>;
+		slot1	= <4>;
+		slot2	= <6>;
+		slot2-valid = <0>;
+		duplicate = <0>;
+		data16	= <0>;
+		cnb	= <1>;
+		lnb	= <1>;
+		cwb	= <0>;
+		lwb	= <1>;
+	};
+};
+
+snd_tdm_lantiq_duslic_config: snd-uni-tdm-config {
+	pclk-rate	= <1024000>;
+	fs-rate		= <8000>;
+	fs-divider	= <16>;
+	fs01-rate	= <8000>;
+	fs02-rate	= <8000>;
+	fs02-delay-clock = <0>;
+	fs02-delay-timeslot = <0>;
+	msbit-start	= <0>;
+
+	frame-size	= <4>;
+
+	handset-count	= <2>;
+	handset-info	= <&snd_tdm_lantiq_duslic_handset_info>;
+};
+
+snd_tdm_player0: snd-uni-tdm@0xfeba4000 {
+	compatible	= "st,snd_uni_tdm";
+	status		= "disabled";
+	reg		= <0xfeba4000 0x150>;
+	interrupts	= <0 219 0>;
+	padcfg-names	= "default";
+	padcfg-0	= <&padcfg_snd_tdm_player0>;
+
+	description	= "Uni TDM Player #0";
+	version		= <0>;
+	card-device	= <0xffffffff>;
+
+	fdma-name	= "stm-fdma.2";
+	fdma-channel	= <1>;
+	fdma-initiator	= <1>;
+	fdma-direction	= "DMA_MEM_TO_DEV";
+	fdma-direct-conn = <1>;
+	fdma-request-line = <30>;
+
+	clk-rate	= <49152000>;
+	rising-edge	= <1>;
+	hw-config	= <&snd_tdm_lantiq_duslic_config>;
+	frame-count	= <80>;
+	max-periods	= <10>;
+};
+
+snd_tdm_reader0: snd-uni-tdm@0xfeba5000 {
+	compatible	= "st,snd_uni_tdm";
+	status		= "disabled";
+	reg		= <0xfeba5000 0x150>;
+	interrupts	= <0 220 0>;
+	padcfg-names	= "default";
+	padcfg-0	= <&padcfg_snd_tdm_reader0>;
+
+	description	= "Uni TDM Reader #0";
+	version		= <0>;
+	card-device	= <0xffffffff>;
+
+	fdma-name	= "stm-fdma.2";
+	fdma-channel	= <2>;
+	fdma-initiator	= <1>;
+	fdma-direction	= "DMA_DEV_TO_MEM";
+	fdma-direct-conn = <1>;
+	fdma-request-line = <29>;
+
+	rising-edge	= <0>;
+	hw-config	= <&snd_tdm_lantiq_duslic_config>;
+	frame-count	= <80>;
+	max-periods	= <10>;
+};

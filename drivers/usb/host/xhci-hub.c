@@ -28,6 +28,18 @@
 #define	PORT_WAKE_BITS	(PORT_WKOC_E | PORT_WKDISC_E | PORT_WKCONN_E)
 #define	PORT_RWC_BITS	(PORT_CSC | PORT_PEC | PORT_WRC | PORT_OCC | \
 			 PORT_RC | PORT_PLC | PORT_PE)
+/*
+ * Bits pattern for port disconnection
+ * - port power (bit 9) has to be 1
+ * - port connect (bit 0) has to be 0 (it implies nothing is plugged)
+ * - port link state write strobe (bit 16) has to be 1 (it implies
+ *   the port link state (bits[8:5]) is writable and consistent)
+ * - port link state (bits[8:5]) are in rxdetect mode ([0x5])
+ */
+#define PORT_CONNECT_BITS	(PORT_LINK_STROBE | PORT_POWER | PORT_PLS_MASK \
+				 | PORT_CONNECT)
+#define PORT_IS_DISCONNECTED(x) ((x & PORT_CONNECT_BITS) == \
+				(PORT_LINK_STROBE | PORT_POWER | XDEV_RXDETECT))
 
 /* usb 1.1 root hub device descriptor */
 static u8 usb_bos_descriptor [] = {
@@ -535,6 +547,11 @@ void xhci_del_comp_mod_timer(struct xhci_hcd *xhci, u32 status, u16 wIndex)
 	}
 }
 
+void __weak xhci_hub_on_disconnect(struct usb_hcd *hcd)
+{
+	return;
+}
+
 int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		u16 wIndex, char *buf, u16 wLength)
 {
@@ -691,6 +708,17 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			status |= 1 << USB_PORT_FEAT_C_SUSPEND;
 		xhci_dbg(xhci, "Get port status returned 0x%x\n", status);
 		put_unaligned(cpu_to_le32(status), (__le32 *) buf);
+
+		/* Check for device disconnection from roothub
+		 * before invoking the xhci_hub_on_disconnection function.
+		 * It is defined as a dummy weak function, to be really
+		 * implemented by those controllers that require to do
+		 * something on device disconnection.
+		 *
+		 */
+		if (PORT_IS_DISCONNECTED(status))
+			xhci_hub_on_disconnect(hcd);
+
 		break;
 	case SetPortFeature:
 		if (wValue == USB_PORT_FEAT_LINK_STATE)

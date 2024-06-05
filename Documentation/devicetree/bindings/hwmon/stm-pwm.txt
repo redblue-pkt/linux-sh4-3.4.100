@@ -1,0 +1,97 @@
+===============================================================================
+			stm pwm
+===============================================================================
+
+Required properties:
+- compatible : "st,pwm".
+- reg, reg-names, interrupts, interrupt-names	: Standard way to define device
+			resources with names. look in
+			Documentation/devicetree/bindings/resource-names.txt
+- clk : Specify device clk on clk alias for this device
+
+Required properties(Per Channel) PWM and CPT subnodes:
+- padcfg	Standard way to pass pad config to the drivers.
+- #address-cells: fixed to 1
+- #size-cells: fixed to 0
+
+- Child nodes "out" for each pwm output channel, which may contain following properties
+    - reg: defines the channel number
+    - st,initial-value: initial channel config required to be done during probe
+    - st,retain-hw-value: channel config programmed by bootloader to be retained
+    - st,locked: the channel is readonly for user
+
+- Child node "capt" for each pwm capture channel, which may contain following property
+    - reg: defines the channel number
+
+Example:
+	pwm0 {
+		clk = "comms_clk";
+
+		out {
+			status = "okay";
+			padcfg-names = "chan0", "chan1", "chan2", "chan3";
+			padcfg-0 = <&padcfg_pwm0_chan0>;
+			padcfg-1 = <&padcfg_pwm0_chan1>;
+			padcfg-2 = <&padcfg_pwm0_chan2>;
+			padcfg-3 = <&padcfg_pwm0_chan3>;
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+			out-channel@0 {
+				reg = <0>;
+				status = "disabled";
+				st,initial-value = <0>;
+				st,retain-hw-value;
+				st,locked;
+			};
+			out-channel@1 {
+				reg = <1>;
+				status = "disabled";
+				st,initial-value = <0>;
+				st,retain-hw-value;
+				st,locked;
+			};
+			out-channel@2 {
+				reg = <2>;
+				status = "disabled";
+				st,initial-value = <0>;
+				st,retain-hw-value;
+				st,locked;
+			};
+			out-channel@3 {
+				reg = <3>;
+				status = "disabled";
+				st,initial-value = <0>;
+				st,retain-hw-value;
+				st,locked;
+			};
+		};
+
+		capt {
+			status = "okay";
+			padcfg-names = "chan0", "chan1", "chan2", "chan3";
+			padcfg-0 = <&padcfg_capt0_chan0>;
+			padcfg-1 = <&padcfg_capt0_chan1>;
+			padcfg-2 = <&padcfg_capt0_chan2>;
+			padcfg-3 = <&padcfg_capt0_chan3>;
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+			capt-channel@0 {
+				reg = <0>;
+				status = "disabled";
+			};
+			capt-channel@1 {
+				reg = <1>;
+				status = "disabled";
+			};
+			capt-channel@2 {
+				reg = <2>;
+				status = "disabled";
+			};
+			capt-channel@3 {
+				reg = <3>;
+				status = "disabled";
+			};
+		};
+	};

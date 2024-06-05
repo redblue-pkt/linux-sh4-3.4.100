@@ -1,0 +1,103 @@
+config MALI400
+	tristate "Mali-300/400/450 support"
+	depends on ARM
+	select DMA_SHARED_BUFFER
+	---help---
+	  This enables support for the ARM Mali-300, Mali-400, and Mali-450
+	  GPUs.
+
+	  To compile this driver as a module, choose M here: the module will be
+	  called mali.
+
+config MALI400_DEBUG
+	bool "Enable debug in Mali driver"
+	depends on MALI400
+	---help---
+	  This enabled extra debug checks and messages in the Mali driver.
+
+config MALI400_PROFILING
+	bool "Enable Mali profiling"
+	depends on MALI400
+	select TRACEPOINTS
+	default n
+	---help---
+	  This enables gator profiling of Mali GPU events.
+
+config MALI400_INTERNAL_PROFILING
+	bool "Enable internal Mali profiling API"
+	depends on MALI400_PROFILING
+	default n
+	---help---
+	  This enables the internal legacy Mali profiling API.
+
+config MALI400_POWER_PERFORMANCE_POLICY
+	bool "Enable Mali power performance policy"
+	depends on MALI400
+	default n
+	---help---
+	  This enables support for dynamic performance scaling of Mali with the goal of lowering power consumption.
+
+config MALI_DMA_BUF_MAP_ON_ATTACH
+	bool "Map dma-buf attachments on attach"
+	depends on MALI400 && DMA_SHARED_BUFFER
+	default y
+	---help---
+	  This makes the Mali driver map dma-buf attachments after doing
+	  attach. If this is not set the dma-buf attachments will be mapped for
+	  every time the GPU need to access the buffer.
+
+	  Mapping for each access can cause lower performance.
+
+config MALI_SHARED_INTERRUPTS
+	bool "Support for shared interrupts"
+	depends on MALI400
+	default n
+	---help---
+	  Adds functionality required to properly support shared interrupts.  Without this support,
+	  the device driver will fail during insmod if it detects shared interrupts.  This also
+	  works when the GPU is not using shared interrupts, but might have a slight performance
+	  impact.
+
+config MALI_PMU_PARALLEL_POWER_UP
+	bool "Power up Mali PMU domains in parallel"
+	depends on MALI400
+	default n
+	---help---
+	  This makes the Mali driver power up all PMU power domains in parallel, instead of
+	  powering up domains one by one, with a slight delay in between. Powering on all power
+	  domains at the same time may cause peak currents higher than what some systems can handle.
+	  These systems must not enable this option.
+
+menu "STM Mali-400 configuration"
+	depends on MALI400
+	comment "Configurable Stm Mali-400 options"
+
+config STM_MALI_MEM_SIZE
+	hex "Max memory size for shared model"
+	default "0x0E000000"
+	---help---
+	  Specify the size of memory which the Mali driver is allowed to
+	  allocate from Linux kernel.
+	  This size value rappresents the maximum limit of memory the OS
+	  can assign to the Mali GPU.
+
+config	STM_MALI_MEM_DEDICATED
+	bool "Enable dedicated memory model"
+	default n
+	select BPA2
+	---help---
+	  Use this resource to configure dedicated areas of memory that are used
+	  exclusively by the Mali GPU. You must not share this memory with
+	  any other device or memory allocator.
+	  The memory allocator privileges this than the shared.
+	  Only when the dedicated memory will finish the allocator will use
+	  the shared.
+
+	  The driver will retreive base address and size from a BPA2 partition
+	  called: mali-memory:base:size
+
+	  bpa2parts=mali-memory:192M:0x40000000
+
+	  If unsure don't enable this memory model.
+
+endmenu

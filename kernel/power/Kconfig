@@ -23,7 +23,7 @@ config HIBERNATE_CALLBACKS
 
 config HIBERNATION
 	bool "Hibernation (aka 'suspend to disk')"
-	depends on SWAP && ARCH_HIBERNATION_POSSIBLE
+	depends on ARCH_HIBERNATION_POSSIBLE
 	select HIBERNATE_CALLBACKS
 	select LZO_COMPRESS
 	select LZO_DECOMPRESS
@@ -90,6 +90,52 @@ config PM_STD_PARTITION
 	  Note there is currently not a way to specify which device to save the
 	  suspended image to. It will simply pick the first available swap 
 	  device.
+
+config HIBERNATION_ON_DISK
+	bool "Hibernation on disk"
+	select HIBERNATION
+	select SWAP
+	---help---
+	  Enable the hibernation on disk functionality.
+	  You can suspend your machine with 'echo disk > /sys/power/state'
+	  after placing resume=/dev/swappartition on the kernel command line
+	  in your bootloader's configuration file.
+
+config HIBERNATION_ON_MEMORY
+	bool "Hibernation on memory"
+	select HIBERNATION
+	---help---
+	  Enable the hibernation on memory (HoM) functionality. This techniques
+	  will put the memory in self-refresh and after that it will turn-off
+	  the chip.
+
+config HOM_TAG_PHYSICAL_ADDRESS
+	hex "Hibernation on memory - Tag physical address"
+	depends on HIBERNATION_ON_MEMORY
+	depends on ARM || SUPERH
+	default "0x60001800" if ARM
+	default "0x40001800" if SUPERH
+	---help---
+	  Set the Absolute Physical Address where the Hibernation,
+	  writes the HoM maker.
+
+config HOM_DEBUG
+	bool "Hibernation on memory - Debug"
+	depends on HIBERNATION_ON_MEMORY
+	default n
+	---help---
+	  This option enables the hom_printk function. This works
+	  like a standard printk on the empty_zero_page.
+	  It's used as a rudimentary printk to debug.
+
+config HOM_SELF_RESET
+	bool "Hibernation on memory - Self Reset"
+	depends on HIBERNATION_ON_MEMORY
+	select HOM_DEBUG
+	default n
+	---help---
+	  This option adds the CPU self-reset as last action in the HoM system
+	  This is done to raise a complete HoM flow when SBC/LPM isn't used.
 
 config PM_SLEEP
 	def_bool y

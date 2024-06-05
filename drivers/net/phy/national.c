@@ -136,6 +136,8 @@ static struct phy_driver dp83865_driver = {
 	.read_status = genphy_read_status,
 	.ack_interrupt = ns_ack_interrupt,
 	.config_intr = ns_config_intr,
+	.suspend = genphy_suspend,
+	.resume = genphy_resume,
 	.driver = {.owner = THIS_MODULE,}
 };
 

@@ -147,18 +147,7 @@ static int tegra_ehci_hub_control(
 
 	spin_lock_irqsave(&ehci->lock, flags);
 
-	/*
-	 * In ehci_hub_control() for USB_PORT_FEAT_ENABLE clears the other bits
-	 * that are write on clear, by writing back the register read value, so
-	 * USB_PORT_FEAT_ENABLE is handled by masking the set on clear bits
-	 */
-	if (typeReq == ClearPortFeature && wValue == USB_PORT_FEAT_ENABLE) {
-		temp = ehci_readl(ehci, status_reg) & ~PORT_RWC_BITS;
-		ehci_writel(ehci, temp & ~PORT_PE, status_reg);
-		goto done;
-	}
-
-	else if (typeReq == GetPortStatus) {
+	if (typeReq == GetPortStatus) {
 		temp = ehci_readl(ehci, status_reg);
 		if (tegra->port_resuming && !(temp & PORT_SUSPEND)) {
 			/* Resume completed, re-enable disconnect detection */
@@ -291,29 +280,13 @@ static int tegra_ehci_setup(struct usb_hcd *hcd)
 
 	/* EHCI registers start at offset 0x100 */
 	ehci->caps = hcd->regs + 0x100;
-	ehci->regs = hcd->regs + 0x100 +
-		HC_LENGTH(ehci, readl(&ehci->caps->hc_capbase));
-
-	dbg_hcs_params(ehci, "reset");
-	dbg_hcc_params(ehci, "reset");
-
-	/* cache this readonly data; minimize chip reads */
-	ehci->hcs_params = readl(&ehci->caps->hcs_params);
 
 	/* switch to host mode */
 	hcd->has_tt = 1;
-	ehci_reset(ehci);
 
-	retval = ehci_halt(ehci);
+	retval = ehci_setup(ehci);
 	if (retval)
 		return retval;
-
-	/* data structure init */
-	retval = ehci_init(hcd);
-	if (retval)
-		return retval;
-
-	ehci->sbrn = 0x20;
 
 	ehci_port_power(ehci, 1);
 	return retval;
@@ -476,12 +449,11 @@ static int controller_suspend(struct device *dev)
 	if (time_before(jiffies, ehci->next_statechange))
 		msleep(10);
 
-	spin_lock_irqsave(&ehci->lock, flags);
-
-	tegra->port_speed = (readl(&hw->port_status[0]) >> 26) & 0x3;
 	ehci_halt(ehci);
-	clear_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags);
 
+	spin_lock_irqsave(&ehci->lock, flags);
+	tegra->port_speed = (readl(&hw->port_status[0]) >> 26) & 0x3;
+	clear_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags);
 	spin_unlock_irqrestore(&ehci->lock, flags);
 
 	tegra_ehci_power_down(hcd);

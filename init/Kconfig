@@ -956,7 +956,6 @@ config ANON_INODES
 menuconfig EXPERT
 	bool "Configure standard kernel features (expert users)"
 	# Unhide debug options, to make the on-by-default options visible
-	select DEBUG_KERNEL
 	help
 	  This option allows certain base kernel options and settings
           to be disabled or tweaked. This is for specialized
@@ -1408,6 +1407,30 @@ config MODULE_SRCVERSION_ALL
 	  others sometimes change the module source without updating
 	  the version).  With this option, such a "srcversion" field
 	  will be created for all modules.  If unsure, say N.
+
+config MODULES_BPA2
+	bool "Allocate memory for modules from BPA2"
+	depends on BPA2 && SUPERH
+	help
+	  Setting this option allows to allocate memory for
+	  modules from BPA2 rather than vmalloc().
+
+config MODULES_BPA2_PART_NAME
+	string "Name of BPA2 partition to allocate buffers from"
+	depends on MODULES_BPA2
+	default "modules"
+	help
+	   Define a name of BPA2 partition used for allocating module memory.
+	   As worst case, if name is not given in command line, allocation
+	   will be done through vmalloc().
+
+config MODULES_BPA2_FALLBACK
+	bool "Fallback to vmalloc if BPA2 allocation fails"
+	depends on MODULES_BPA2
+	default y
+	help
+	   Memory for the module will normally be allocated from the BPA2
+	   partition. However if this flag is set then a second attempt will
 
 endif # MODULES
 

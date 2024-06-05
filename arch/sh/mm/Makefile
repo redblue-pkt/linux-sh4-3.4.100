@@ -36,11 +36,13 @@ endif
 
 obj-$(CONFIG_DEBUG_FS)		+= $(debugfs-y)
 obj-$(CONFIG_HUGETLB_PAGE)	+= hugetlbpage.o
-obj-$(CONFIG_PMB)		+= pmb.o
+obj-$(CONFIG_PMB_RENESAS)	+= pmb.o
+obj-$(CONFIG_PMB_ST)		+= pmb_st.o
 obj-$(CONFIG_NUMA)		+= numa.o
 obj-$(CONFIG_IOREMAP_FIXED)	+= ioremap_fixed.o
 obj-$(CONFIG_UNCACHED_MAPPING)	+= uncached.o
 obj-$(CONFIG_HAVE_SRAM_POOL)	+= sram.o
+obj-$(CONFIG_STM_L2_CACHE)	+= stm-l2-cache.o stm-l2-helper.o
 
 GCOV_PROFILE_pmb.o := n
 

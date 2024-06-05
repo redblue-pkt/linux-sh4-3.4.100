@@ -1,0 +1,326 @@
+/*
+ * Copyright (C) 2013 STMicroelectronics Limited.
+ * Author: Giuseppe Condorelli <giuseppe.condorelli@st.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * publishhed by the Free Software Foundation.
+ */
+
+#include "nand/samsung_k9f2g08u0c.dtsi"
+
+/ {
+	chosen {
+		bootargs = "";
+		linux,stdout-path = &uart1;
+	};
+
+	aliases {
+		ttyAS0 = &uart1;
+		i2c0 = &i2c11;	/* HDMI */
+		i2c1 = &i2c0;	/* NIM-A */
+		i2c2 = &i2c2;	/* NIM-B */
+		i2c3 = &i2c4;	/* AUDIO */
+		i2c4 = &i2c1;	/* MediaLB/ADC */
+		mmc0 = &sdhci0;
+		mmc1 = &sdhci1;
+		sata0 = &stm_ahci0;
+	};
+
+	soc {
+		lmi-retention-gpio   = <&PIO5 2 0>;
+
+		/* UART1 */
+		uart1: uart@9831000 {
+			status = "okay";
+		};
+
+		/* pwm1 channel 1 AVS_CPU_CORE_1V0 */
+		pwm1: pwm@9510000 {
+			/*
+			 * Let's keep it disable to allow controlling AVS
+			 * from kernel, by poking directly on the PWM register.
+			 */
+			status = "disabled";
+			out {
+				out-channel@1 {
+					status = "okay";
+				};
+			};
+		};
+
+		nandbch: nand-bch{
+			st,rbn-flex-connected;
+			status = "okay";
+			st,nand-banks = <&nand_banks>;
+		};
+
+		nand_banks: nand-banks {
+			bank0 {
+				/* NAND_BBT_USE_FLASH (4Gbit) */
+				nand-on-flash-bbt;
+				nand-no-autoincr;
+				st,nand-csn		= <0>;
+				st,nand-timing-data	= <&nand_timing0>;
+				partitions {
+					#address-cells = <1>;
+					#size-cells = <1>;
+					partition@0{
+						label = "NAND Flash 1";
+						reg = <0x00000000 0x1e000000>;
+					};
+				};
+			};
+		};
+
+		nand_timing0: nand-timing {
+			sig-setup	= <10>;
+			sig-hold	= <10>;
+			CE-deassert	= <0>;
+			WE-to-RBn	= <100>;
+			wr-on		= <10>;
+			wr-off		= <30>;
+			rd-on		= <10>;
+			rd-off		= <30>;
+			chip-delay	= <30>;		/* delay in us */
+		};
+
+		spifsm: spifsm@9022000 {
+			status          = "okay";
+			flash-name      = "mx25l25635e";
+			partitions      = <&b2089_fsm_partitions>;
+			b2089_fsm_partitions: partitions-b2089 {
+				#address-cells = <1>;
+				#size-cells = <1>;
+				partition@0 {
+					label = "Serial Flash 1";
+					/* 5MiB */
+					reg = <0x00000000 0x00500000>;
+				};
+				partition@500000 {
+					label = "Serial Flash 2";
+					/* 27MiB */
+					reg = <0x00500000 0x1B00000>;
+				};
+			};
+		};
+
+		lirc: lirc@09518000 {
+			status = "okay";
+		};
+
+		/* SSC11 to HDMI */
+		i2c11: i2c@9541000{
+			status = "okay";
+			displaylink0:displaylink {
+				status = "okay";
+			};
+		};
+
+		/* SSC0 to NIM-A */
+	        i2c0: i2c@9840000{
+			status = "okay";
+		};
+
+		/* SSC2 to NIM-B */
+		i2c2: i2c@9842000{
+			status = "okay";
+			/* Use a different routing on this board */
+			padcfg-0 = <&padcfg_i2c2_sda_pio14_6 &padcfg_i2c2_sclk_pio14_5>;
+		};
+
+		/* SSC4 to AUDIO */
+		i2c4: i2c@9844000{
+			status = "okay";
+		};
+
+
+                /* SSC1 to MediaLB/ADC */
+		i2c1: i2c@9841000{
+			status = "okay";
+		};
+
+
+		sdhci0:sdhci@09060000 {
+			status = "okay";
+			device-config = <&sdhci0_emmc_dev_config>; // eMMC pad
+			st,mmc-non-removable;
+		};
+
+		/* By default this is for B2143 eMMC daughter board.
+		   In case of using the B2144 SD slot the st,mmc-non-removable
+		   should be commented.
+
+		   MMC1 is MMC4.3 / SD2.0 HC
+		 */
+
+		sdhci1:sdhci@09080000 {
+			status = "okay";
+			device-config = <&sdhci1_emmc_dev_config>; // eMMC pad
+			st,mmc-non-removable;
+			st,mmc-core-init = <1>; // ARASAN_EMMC_4_3 core config
+		};
+
+		/* SYNP GMAC is configured to be attached to the RTL on board
+		   switch; so fixed_phy support is used for communicating
+		   with it.
+		 */
+		ethernet1:ethernet@9630000 {
+			status = "okay";
+			phy-mode	= "rgmii";
+			snps,phy-bus-name = "fixed";
+			snps,phy-bus-id = <0>;
+			snps,phy-addr = <0x1>;
+			device-config = <&rgmii1_dev_config>;
+		};
+
+		realtek: rtl8367rb {
+			compatible	= "realtek,rtl8367rb";
+			status		= "okay";
+
+			gpio-reset	= <&PIO3 5 0>;
+			gpio-sck	= <&PIO1 1 0>;
+			gpio-sda	= <&PIO1 0 0>;
+
+			rtl8367rb,extif1;
+			rtl8367rb,extif1-mode = <1>;	// RGMII
+			rtl8367rb,extif1-txdelay = <0>;
+			rtl8367rb,extif1-rxdelay = <1>;
+			rtl8367rb,extif1-force_mode = <1>;
+			rtl8367rb,extif1-txpause = <2>;
+			rtl8367rb,extif1-rxpause = <2>;
+			rtl8367rb,extif1-link = <1>;
+			rtl8367rb,extif1-duplex = <1>;
+			rtl8367rb,extif1-speed = <1>; // 2 for Giga speed
+
+			rtl8367rb,extif2;
+			rtl8367rb,extif2-mode = <1>;	// RGMII
+			rtl8367rb,extif2-txdelay = <1>;
+			rtl8367rb,extif2-rxdelay = <1>;
+			rtl8367rb,extif2-force_mode = <1>;
+			rtl8367rb,extif2-txpause = <1>;
+			rtl8367rb,extif2-rxpause = <1>;
+			rtl8367rb,extif2-link = <1>;
+			rtl8367rb,extif2-duplex = <1>;
+			rtl8367rb,extif2-speed = <1>; // 2 for Giga speed
+		};
+
+		miphy0: miphy@9b22000 {
+			status = "okay";
+			miphy-modes = "sata";
+			miphy0-dev-config {
+		  		device-seqs = <&miphy0_sata_seq>;
+			};
+		};
+
+		/* SATA AHCI controller on CN14 */
+		stm_ahci0: ahci@9b20000 {
+			status = "okay";
+		};
+
+		/*
+		 * The B2089 board is set up to use internal clocks by default,
+		 * To change to internal clocks, change R80, R89 to positions
+		 * 2-3 and replace R93,R64 with a 50 or 47 Ohm resistor
+		 *
+		 * Even without these mods, it should still work with the external
+		 * clock driving just the card, but the clock will not be common
+		 *
+		 */
+		miphy1: miphy@9b2a000 {
+			status = "okay";
+			miphy-modes     = "pcie";
+			miphy1-dev-config {
+				device-seqs = <&miphy1_pcie_internal_clock_seq>;
+			};
+		};
+
+		pcie1: pcie@9b10000{
+			status = "okay";
+		};
+
+		/* Miphy has to be probed before USB3 controller */
+		miphy2: miphy@08f90000 {
+			status = "okay";
+			miphy-modes     = "usb3";
+		};
+
+		/*
+		  DRD USB3 controller static configuration (mode pin 11)
+			o Host - sw4 position 4_A to GND
+			o Device - sw4 position 4_B to 3V3
+		 */
+		stm_dwc3: dwc3@8f94000 {
+			status = "okay";
+			usb3-dev-config {
+				/* DRD USB3 as host (default) */
+				device-seqs = <&usb3_host_dev_seqs>;
+				/* DRD USB3 as device */
+				/* device-seqs = <&usb3_device_dev_seqs>; */
+			};
+		};
+
+		snd_uni_player0: snd-uni-player@0x08d80000 {
+			compatible	= "st,snd_uni_player";
+			status		= "okay";
+		};
+
+		snd_uni_player1: snd-uni-player@0x08d81000 {
+			compatible	= "st,snd_uni_player";
+			status		= "disabled";
+			padcfg-names	= "default";
+			padcfg-0	= <&padcfg_i2s_8ch_out>;
+		};
+
+		snd_uni_player2: snd-uni-player@0x08d82000 {
+			compatible	= "st,snd_uni_player";
+			status		= "okay";
+		};
+
+		snd_uni_player3: snd-uni-player@0x08d85000 {
+			compatible	= "st,snd_uni_player";
+			status		= "okay";
+			padcfg-names	= "default";
+			padcfg-0	= <&padcfg_spdif_out>;
+		};
+
+		snd_uni_reader0: snd-uni-reader@0x08d83000 {
+			compatible	= "st,snd_uni_reader";
+			status		= "disabled";
+			padcfg-names	= "default";
+			padcfg-0	= <&padcfg_i2s_8ch_in>;
+		};
+
+		snd_uni_reader1: snd-uni-reader@0x08d84000 {
+			compatible	= "st,snd_uni_reader";
+			status		= "okay";
+		};
+
+		snd_conv_dac_sc: snd-conv-dac-sc {
+			compatible	= "st,snd_conv_dac_sc";
+			status		= "okay";
+		};
+
+		snd_conv_biphase: snd-conv-biphase {
+			compatible	= "st,snd_conv_biphase";
+			status		= "okay";
+		};
+
+		snd_audio_glue: snd-audio-glue {
+			compatible	= "st,snd_audio_glue";
+			status		= "okay";
+		};
+
+		keyscan: keyscan@94b0000 {
+			compatible = "st,stm-keyscan";
+			st,keyscan-num-rows = <4>;
+			st,keyscan-num-columns = <4>;
+			st,debounce_us = <5000>;
+			linux,keymap = < /* in0	  in1	in2	in3 */
+				183 67 63 59			/* out0 */
+				184 68 64 60			/* out1 */
+				185 87 65 61			/* out2 */
+				186 88 66 62 >;			/* out3 */
+		};
+	};
+};

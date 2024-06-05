@@ -85,7 +85,7 @@ ENTRY(_stext)
 	ldc	r0, r7_bank	! ... and initial thread_info
 #endif
 
-#ifdef CONFIG_PMB
+#ifdef CONFIG_PMB_RENESAS
 /*
  * Reconfigure the initial PMB mappings setup by the hardware.
  *
@@ -322,9 +322,10 @@ ENTRY(_stext)
 	SYNCO()			! Wait for pending instructions..
 	
 	!			Start kernel
+	mov	#0, r1
 	mov.l	5f, r0
 	jmp	@r0
-	 nop
+	 lds	r1, pr
 
 	.balign 4
 #if defined(CONFIG_CPU_SH2)

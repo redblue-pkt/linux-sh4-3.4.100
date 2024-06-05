@@ -1,0 +1,1086 @@
+/*
+ * Copyright (C) 2013 STMicroelectronics Limited.
+ * Author: giuseppe.condorelli <giuseppe.condorelli@st.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * publishhed by the Free Software Foundation.
+ */
+#include "stm-padcfg.h"
+
+/ {
+	pad-configs {
+		/* COMMS_ASC0 - UART0 */
+		uart0 {
+			padcfg_uart0: uart0-0 {
+				st,pins {
+					TX	= <&PIO17 0	OUT	ALT1>;
+					RX	= <&PIO17 1	IN 	ALT1>;
+				};
+			};
+			padcfg_uart0_rts: uart0_rts {
+				st,pins {
+					RTS	= <&PIO17 3	OUT	ALT1 >;
+				};
+			};
+			padcfg_uart0_cts: uart0_cts {
+				st,pins {
+					CTS	= <&PIO17 2	IN 	ALT1 >;
+				};
+			};
+		};
+		/* COMMS_ASC1 - UART1 */
+		uart1 {
+			padcfg_uart1: uart1-0 {
+				st,pins {
+
+					TX	= <&PIO16 0	OUT	ALT1>;
+					RX	= <&PIO16 1	IN 	ALT1>;
+				};
+			};
+			padcfg_uart1_rts: uart1_rts {
+				st,pins {
+					RTS	= <&PIO16 3	OUT	ALT1 >;
+				};
+			};
+			padcfg_uart1_cts: uart1_cts {
+				st,pins {
+					CTS	= <&PIO16 2	IN 	ALT1 >;
+				};
+			};
+		};
+		/* COMMS_ASC2 - UART2 */
+		uart2 {
+			padcfg_uart2: uart2-0 {
+				st,pins {
+					TX	= <&PIO15 0	OUT	ALT1>;
+					RX	= <&PIO15 1	IN 	ALT1>;
+				};
+			};
+			padcfg_uart2_rts: uart2_rts {
+				st,pins {
+					RTS	= <&PIO15 3	OUT	ALT1 >;
+				};
+			};
+			padcfg_uart2_cts: uart2_cts {
+				st,pins {
+					CTS	= <&PIO15 2	IN 	ALT1 >;
+				};
+			};
+		};
+		/* COMMS_ASC3 - UART3 */
+		uart3 {
+			padcfg_uart3_pio31: uart3_pio31-0 {
+				st,pins {
+					TX	= <&PIO31 3	OUT	ALT1>;
+					RX	= <&PIO31 4	IN 	ALT1>;
+				};
+			};
+			padcfg_uart3_pio31_rts: uart3_pio31_rts {
+				st,pins {
+					RTS	= <&PIO31 6	IN 	ALT1 >;
+				};
+			};
+			padcfg_uart3_pio31_cts: uart3_pio31_cts {
+				st,pins {
+					CTS	= <&PIO31 5	OUT	ALT1 >;
+				};
+			};
+
+			padcfg_uart3_pio34: uart3_pio34-0 {
+				st,pins {
+					TX	= <&PIO34 0	OUT	ALT1>;
+					RX	= <&PIO34 1	IN 	ALT1>;
+				};
+			};
+			padcfg_uart3_pio34_rts: uart3_pio34_rts {
+				st,pins {
+					RTS	= <&PIO34 6	IN 	ALT1 >;
+				};
+			};
+			padcfg_uart3_pio34_cts: uart3_pio34_cts {
+				st,pins {
+					CTS	= <&PIO34 2	OUT	ALT1 >;
+				};
+			};
+		};
+		/* SBC_ASC0 - UART10 */
+		sbc_uart0 {
+			padcfg_sbc_uart0: sbc_uart0-0 {
+				st,pins {
+					TX	= <&PIO3 4	OUT	ALT1>;
+					RX	= <&PIO3 5	IN 	ALT1>;
+				};
+			};
+			padcfg_sbc_uart0_rts: sbc_uart0_rts {
+				st,pins {
+					RTS	= <&PIO3 7	OUT	ALT1 >;
+				};
+			};
+			padcfg_sbc_uart0_cts: sbc_uart0_cts {
+				st,pins {
+					CTS	= <&PIO3 6	IN 	ALT1 >;
+				};
+			};
+		};
+		/* SBC_ASC1 - UART11 */
+		sbc_uart1 {
+			padcfg_sbc_uart1: sbc_uart1-0 {
+				st,pins {
+					TX	= <&PIO2 6	OUT	ALT3>;
+					RX	= <&PIO2 7	IN 	ALT3>;
+				};
+			};
+			padcfg_sbc_uart1_rts: sbc_uart1_rts {
+				st,pins {
+					RTS	= <&PIO3 1	OUT	ALT3 >;
+				};
+			};
+			padcfg_sbc_uart1_cts: sbc_uart1_cts {
+				st,pins {
+					CTS	= <&PIO3 0	IN 	ALT3 >;
+				};
+			};
+		};
+
+		nand {
+			padcfg_nand: nand {
+				st,pins {
+					NAND_CS1 = <&PIO40 6    OUT             ALT3>; /* NAND CS1 */
+					NAND_CS0 = <&PIO40 7	OUT		ALT3>; /* NAND CS0 */
+					NAND_D0  = <&PIO41 0	BIDIR		ALT3>; /* NAND Data[0] */
+					NAND_D1  = <&PIO41 1	BIDIR		ALT3>; /* NAND Data[1] */
+					NAND_D2  = <&PIO41 2	BIDIR		ALT3>; /* NAND Data[2] */
+					NAND_D3  = <&PIO41 3	BIDIR		ALT3>; /* NAND Data[3] */
+					NAND_D4  = <&PIO41 4	BIDIR		ALT3>; /* NAND Data[4] */
+					NAND_D5  = <&PIO41 5	BIDIR		ALT3>; /* NAND Data[5] */
+					NAND_D6  = <&PIO41 6	BIDIR		ALT3>; /* NAND Data[6] */
+					NAND_D7  = <&PIO41 7	BIDIR		ALT3>; /* NAND Data[7] */
+					NAND_WE  = <&PIO42 0	OUT		ALT3>; /* NAND WE */
+					NAND_DQS = <&PIO42 1	OUT		ALT3>; /* NAND DQS */
+					NAND_ALE = <&PIO42 2	OUT		ALT3>; /* NAND ALE */
+					NAND_CLE = <&PIO42 3	OUT		ALT3>; /* NAND CLE */
+					NAND_RNB = <&PIO42 4	IN		ALT3>; /* NAND RNB */
+					NAND_OE  = <&PIO42 5	OUT		ALT3>; /* NAND OE */
+				};
+			};
+
+		};
+
+		mmc0 {
+			padcfg_mmc0: mmc0 {
+				st,pins {
+					EMMC_CLK = <&PIO40 6	BIDIR 		ALT1>; /* MMC Clock   */
+					EMMC_CMD = <&PIO40 7	BIDIR_PU	ALT1>; /* MMC Command */
+					EMMC_D0  = <&PIO41 0	BIDIR_PU	ALT1>; /* MMC Data[0] */
+					EMMC_D1  = <&PIO41 1	BIDIR_PU	ALT1>; /* MMC Data[1] */
+					EMMC_D2  = <&PIO41 2	BIDIR_PU	ALT1>; /* MMC Data[2] */
+					EMMC_D3  = <&PIO41 3	BIDIR_PU	ALT1>; /* MMC Data[3] */
+					EMMC_D4  = <&PIO41 4	BIDIR_PU	ALT1>; /* MMC Data[4] */
+					EMMC_D5  = <&PIO41 5	BIDIR_PU	ALT1>; /* MMC Data[5] */
+					EMMC_D6  = <&PIO41 6	BIDIR_PU	ALT1>; /* MMC Data[6] */
+					EMMC_D7  = <&PIO41 7	BIDIR_PU	ALT1>; /* MMC Data[7] */
+				};
+			};
+
+			padcfg_sd0: sd0 {
+				st,pins {
+					SD_CLK   = <&PIO40 6	BIDIR 		ALT2>; /* SD Clock */
+					SD_CMD   = <&PIO40 7	BIDIR_PU        ALT2>; /* SD Command */
+					SD_DAT0  = <&PIO41 0	BIDIR_PU        ALT2>; /* SD Data[0]*/
+					SD_DAT1  = <&PIO41 1	BIDIR_PU        ALT2>; /* SD Data[1]*/
+					SD_DAT2  = <&PIO41 2	BIDIR_PU        ALT2>; /* SD Data[2]*/
+					SD_DAT3  = <&PIO41 3	BIDIR_PU        ALT2>; /* SD Data[3]*/
+					SD_LED   = <&PIO42 0	OUT		ALT2>; /* SD LED on */
+					SD_PWREN = <&PIO42 2	OUT		ALT2>; /* SD Card PWR */
+					SD_VSEL  = <&PIO42 3	OUT		ALT2>; /* SD VSEL  */
+					SD_CD    = <&PIO42 4	IN		ALT2>; /* SD Card Detect */
+					SD_WP    = <&PIO42 5	IN		ALT2>; /* SD Write Protection */
+				};
+			};
+		};
+
+		mmc1 {
+			padcfg_mmc1: mmc1 {
+				st,pins {
+					EMMC_CLK = <&PIO19 3	BIDIR		ALT5	NICLK	0	CLK_B>; /* MMC Clock   */
+					EMMC_CMD = <&PIO19 2	BIDIR_PU	ALT5	BYPASS	0>; /* MMC Command */
+					EMMC_D0  = <&PIO19 4	BIDIR_PU	ALT5	BYPASS	0>; /* MMC Data[0] */
+					EMMC_D1  = <&PIO19 5	BIDIR_PU	ALT5	BYPASS	0>; /* MMC Data[1] */
+					EMMC_D2  = <&PIO19 6	BIDIR_PU	ALT5	BYPASS	0>; /* MMC Data[2] */
+					EMMC_D3  = <&PIO19 7	BIDIR_PU	ALT5	BYPASS	0>; /* MMC Data[3] */
+					EMMC_D4  = <&PIO16 6	BIDIR_PU	ALT5	BYPASS	0>; /* MMC Data[4] */
+					EMMC_D5  = <&PIO16 7	BIDIR_PU	ALT5	BYPASS	0>; /* MMC Data[5] */
+					EMMC_D6  = <&PIO19 0	BIDIR_PU	ALT5	BYPASS	0>; /* MMC Data[6] */
+					EMMC_D7  = <&PIO19 1	BIDIR_PU	ALT5	BYPASS	0>; /* MMC Data[7] */
+				};
+			};
+
+			padcfg_sd1: sd1 {
+				st,pins {
+					SD_CLK   = <&PIO19 3	BIDIR		ALT5    CLKNOTDATA   0       CLK_B	FORCE_OUTPUT_DELAY	3250>; /* SD Clock */
+					SD_CMD   = <&PIO19 2	BIDIR_PU        ALT5    BYPASS  0	FORCE_INPUT_DELAY	3250>; /* SD Command */
+					SD_DAT0  = <&PIO19 4	BIDIR_PU        ALT5    BYPASS  0	FORCE_INPUT_DELAY	3250>; /* SD Data[0]*/
+					SD_DAT1  = <&PIO19 5	BIDIR_PU        ALT5    BYPASS  0	FORCE_INPUT_DELAY	3250>; /* SD Data[1]*/
+					SD_DAT2  = <&PIO19 6	BIDIR_PU        ALT5    BYPASS  0	FORCE_INPUT_DELAY	3250>; /* SD Data[2]*/
+					SD_DAT3  = <&PIO19 7	BIDIR_PU	ALT5    BYPASS  0	FORCE_INPUT_DELAY	3250>; /* SD Data[3]*/
+					SD_LED   = <&PIO16 6	OUT		ALT6>; /* SD LED on */
+					SD_PWREN = <&PIO16 7	OUT		ALT6>; /* SD Card PWR */
+					SD_CD    = <&PIO19 0	IN_PU		ALT6>; /* SD Card Detect */
+					SD_WP    = <&PIO19 1	IN		ALT6>; /* SD Write Protection */
+				};
+			};
+		};
+
+		fsm {
+			padcfg_fsm: fsm {
+				st,pins {
+					spi-fsm-clk     = <&PIO40 1 OUT ALT1>;
+					spi-fsm-cs      = <&PIO40 0 OUT ALT1>;
+					spi-fsm-mosi    = <&PIO40 2 OUT ALT1>;
+					spi-fsm-miso    = <&PIO40 3 IN ALT1>;
+					spi-fsm-hol     = <&PIO40 5 OUT ALT1>;
+					spi-fsm-wp      = <&PIO40 4 OUT ALT1>;
+				};
+			};
+		};
+
+		i2c0 {
+			/* sclk routing */
+			padcfg_i2c0_sclk_pio10_5: i2c0_sclk_pio10_5 {
+				st,pins {
+					SCL     = <&PIO10 5      BIDIR   ALT2>;
+				};
+			};
+
+			padcfg_i2c0_sclk_pio19_6: i2c0_sclk_pio19_6 {
+				st,pins {
+					SCL     = <&PIO19 6      BIDIR   ALT1>;
+				};
+			};
+
+			/* sda routing */
+			padcfg_i2c0_sda_pio10_6: i2c0_sda_pio10_6 {
+				st,pins {
+					SDA     = <&PIO10 6      BIDIR   ALT2>;
+				};
+			};
+			padcfg_i2c0_sda_pio19_7: i2c0_sda_pio19_7 {
+				st,pins {
+					SDA     = <&PIO19 7      BIDIR   ALT1>;
+				};
+			};
+		};
+
+		i2c1 {
+			/* sclk routing */
+			padcfg_i2c1_sclk_pio14_2: i2c1_sclk_pio14_2 {
+				st,pins {
+					SCL     = <&PIO14 2      BIDIR   ALT1>;
+				};
+			};
+
+			padcfg_i2c1_sclk_pio11_0: i2c1_sclk_pio11_0 {
+				st,pins {
+					SCL     = <&PIO11 0      BIDIR   ALT2>;
+				};
+			};
+
+			padcfg_i2c1_sclk_pio19_0: i2c1_sclk_pio19_0 {
+				st,pins {
+					SCL     = <&PIO19 0      BIDIR   ALT4>;
+				};
+			};
+
+			/* sda routing */
+			padcfg_i2c1_sda_pio14_3: i2c1_sda_pio14_3 {
+				st,pins {
+					SDA     = <&PIO14 3      BIDIR   ALT1>;
+				};
+			};
+			padcfg_i2c1_sda_pio11_1: i2c1_sda_pio11_1 {
+				st,pins {
+					SDA     = <&PIO11 1      BIDIR   ALT2>;
+				};
+			};
+			padcfg_i2c1_sda_pio19_1: i2c1_sda_pio19_1 {
+				st,pins {
+					SDA     = <&PIO19 1      BIDIR   ALT4>;
+				};
+			};
+		};
+
+		i2c2 {
+			/* sclk routing */
+			padcfg_i2c2_sclk_pio14_5: i2c2_sclk_pio14_5 {
+				st,pins {
+					SCL     = <&PIO14 5      BIDIR   ALT1>;
+				};
+			};
+
+			padcfg_i2c2_sclk_pio12_5: i2c2_sclk_pio12_5 {
+				st,pins {
+					SCL     = <&PIO12 5      BIDIR   ALT2>;
+				};
+			};
+
+			padcfg_i2c2_sclk_pio15_5: i2c2_sclk_pio15_5 {
+				st,pins {
+					SCL     = <&PIO15 5      BIDIR   ALT2>;
+				};
+			};
+
+			/* sda routing */
+			padcfg_i2c2_sda_pio14_6: i2c2_sda_pio14_6 {
+				st,pins {
+					SDA     = <&PIO14 6      BIDIR   ALT1>;
+				};
+			};
+			padcfg_i2c2_sda_pio12_6: i2c2_sda_pio12_6 {
+				st,pins {
+					SDA     = <&PIO12 6      BIDIR   ALT2>;
+				};
+			};
+			padcfg_i2c2_sda_pio15_6: i2c2_sda_pio15_6 {
+				st,pins {
+					SDA     = <&PIO15 6      BIDIR   ALT2>;
+				};
+			};
+		};
+
+		i2c3 {
+			/* sclk routing */
+			padcfg_i2c3_sclk_pio18_5: i2c3_sclk_pio18_5 {
+				st,pins {
+					SCL     = <&PIO18 5      BIDIR   ALT1>;
+				};
+			};
+
+			padcfg_i2c3_sclk_pio17_6: i2c3_sclk_pio17_6 {
+				st,pins {
+					SCL     = <&PIO17 6      BIDIR   ALT1>;
+				};
+			};
+
+			padcfg_i2c3_sclk_pio13_5: i2c3_sclk_pio13_5 {
+				st,pins {
+					SCL     = <&PIO13 5      BIDIR   ALT3>;
+				};
+			};
+
+			/* sda routing */
+			padcfg_i2c3_sda_pio17_7: i2c3_sda_pio17_7 {
+				st,pins {
+					SDA     = <&PIO17 7      BIDIR   ALT1>;
+				};
+			};
+			padcfg_i2c3_sda_pio18_6: i2c3_sda_pio18_6 {
+				st,pins {
+					SDA     = <&PIO18 6      BIDIR   ALT1>;
+				};
+			};
+			padcfg_i2c3_sda_pio13_6: i2c3_sda_pio13_6 {
+				st,pins {
+					SDA     = <&PIO13 6      BIDIR   ALT3>;
+				};
+			};
+		};
+
+		i2c4 {
+			/* sclk routing */
+			padcfg_i2c4_sclk_pio30_0: i2c4_sclk_pio30_0 {
+				st,pins {
+					SCL     = <&PIO30 0      BIDIR   ALT1>;
+				};
+			};
+
+			padcfg_i2c4_sclk_pio35_4: i2c4_sclk_pio35_4 {
+				st,pins {
+					SCL     = <&PIO35 4      BIDIR   ALT2>;
+				};
+			};
+
+			padcfg_i2c4_sclk_pio34_0: i2c4_sclk_pio34_0 {
+				st,pins {
+					SCL     = <&PIO34 0      BIDIR   ALT3>;
+				};
+			};
+
+			/* sda routing */
+			padcfg_i2c4_sda_pio30_1: i2c4_sda_pio30_1 {
+				st,pins {
+					SDA     = <&PIO30 1      BIDIR   ALT1>;
+				};
+			};
+			padcfg_i2c4_sda_pio35_5: i2c4_sda_pio35_5 {
+				st,pins {
+					SDA     = <&PIO35 5      BIDIR   ALT2>;
+				};
+			};
+			padcfg_i2c4_sda_pio34_1: i2c4_sda_pio34_1 {
+				st,pins {
+					SDA     = <&PIO34 1      BIDIR   ALT3>;
+				};
+			};
+		};
+
+		i2c5 {
+			padcfg_i2c5: i2c5 {
+				st,pins {
+					SCL	= <&PIO34 3	BIDIR	ALT1>;
+					SDA	= <&PIO34 4	BIDIR	ALT1>;
+				};
+			};
+		};
+
+		i2c10 {
+			padcfg_i2c10: i2c10 {
+				st,pins {
+					SCL	= <&PIO4 5	BIDIR	ALT1>;
+					SDA	= <&PIO4 6	BIDIR	ALT1>;
+				};
+			};
+		};
+
+		i2c11 {
+			/* sclk routing */
+			padcfg_i2c11_sclk_pio5_0: i2c11_sclk_pio5_0 {
+				st,pins {
+					SCL     = <&PIO5 0      BIDIR   ALT1>;
+				};
+			};
+
+			padcfg_i2c11_sclk_pio3_2: i2c11_sclk_pio3_2 {
+				st,pins {
+					SCL     = <&PIO3 2      BIDIR   ALT2>;
+				};
+			};
+
+			/* sda routing */
+			padcfg_i2c11_sda_pio5_1: i2c11_sda_pio5_1 {
+				st,pins {
+					SDA     = <&PIO5 1      BIDIR   ALT1>;
+				};
+			};
+			padcfg_i2c11_sda_pio3_1: i2c11_sda_pio3_1 {
+				st,pins {
+					SDA     = <&PIO3 1      BIDIR   ALT2>;
+				};
+			};
+		};
+
+		i2c12 {
+			padcfg_i2c12: i2c12 {
+				st,pins {
+					SCL	= <&PIO3 7	BIDIR	ALT2>;
+					SDA	= <&PIO3 6	BIDIR	ALT2>;
+				};
+			};
+		};
+
+		/* PWM */
+		pwm0 {
+			padcfg_pwm0_out_chan0: out_chan0 {
+				st,pins {
+					gpio-0  = <&PIO31 1	OUT	ALT1>;
+				};
+			};
+
+			padcfg_capt0_chan0: capt_chan0 {
+				st,pins {
+					gpio-0	= <&PIO31 0	IN	ALT1>;
+				};
+			};
+		};
+
+		pwm1 {
+			padcfg_pwm1_out_chan0: out_chan0 {
+				st,pins {
+					gpio-0  = <&PIO3 0	OUT	ALT1>;
+				};
+			};
+			padcfg_pwm1_out_chan1: out_chan1 {
+				st,pins {
+					gpio-0  = <&PIO4 4	OUT	ALT1>;
+				};
+			};
+			padcfg_pwm1_out_chan2: out_chan2 {
+				st,pins {
+					gpio-0  = <&PIO4 6	OUT	ALT3>;
+				};
+			};
+			padcfg_pwm1_out_chan3: out_chan3 {
+				st,pins {
+					gpio-0  = <&PIO4 7	OUT	ALT3>;
+				};
+			};
+
+			padcfg_capt1_chan0: capt_chan0 {
+				st,pins {
+					gpio-0	= <&PIO3 2	IN	ALT1>;
+				};
+			};
+			padcfg_capt1_chan1: capt_chan1 {
+				st,pins {
+					gpio-0	= <&PIO4 3	IN	ALT1>;
+				};
+			};
+		};
+
+		systrace {
+			padcfg_systrace: systrace {
+				st,pins {
+					data0	= <&PIO11 3	OUT	ALT5>;
+					data1	= <&PIO11 4	OUT	ALT5>;
+					data2	= <&PIO11 5	OUT	ALT5>;
+					data3	= <&PIO11 6	OUT	ALT5>;
+					bclk	= <&PIO11 7	OUT	ALT5>;
+				};
+			};
+		};
+
+		spissc0 {
+			/* sclk routing */
+			padcfg_spissc0_sclk_pio10_5: spissc0_sclk_pio10_5 {
+				st,pins {
+					SCL     = <&PIO10 5      OUT   ALT2>;
+				};
+			};
+
+			padcfg_spissc0_sclk_pio19_6: spissc0_sclk_pio19_6 {
+				st,pins {
+					SCL     = <&PIO19 6      OUT   ALT1>;
+				};
+			};
+
+
+			/* mtsr routing */
+			padcfg_spissc0_mtsr_pio10_6: spissc0_mtsr_pio10_6 {
+				st,pins {
+					MTSR     = <&PIO10 6      OUT   ALT2>;
+				};
+			};
+			padcfg_spissc0_mtsr_pio19_7: spissc0_mtsr_pio19_7 {
+				st,pins {
+					MTSR     = <&PIO19 7      OUT   ALT1>;
+				};
+			};
+
+			/* mrst routing */
+			padcfg_spissc0_mrst_pio10_7: spissc0_mrst_pio10_7 {
+				st,pins {
+					MRST     = <&PIO10 7      IN   ALT2>;
+				};
+			};
+			padcfg_spissc0_mrst_pio19_5: spissc0_mrst_pio19_5 {
+				st,pins {
+					MRST     = <&PIO19 5      IN   ALT1>;
+				};
+			};
+		};
+
+		spissc1 {
+			/* sclk routing */
+			padcfg_spissc1_sclk_pio14_2: spissc1_sclk_pio14_2 {
+				st,pins {
+					SCL     = <&PIO14 2      OUT   ALT1>;
+				};
+			};
+
+			padcfg_spissc1_sclk_pio11_0: spissc1_sclk_pio11_0 {
+				st,pins {
+					SCL     = <&PIO11 0      OUT   ALT2>;
+				};
+			};
+
+			padcfg_spissc1_sclk_pio19_0: spissc1_sclk_pio19_0 {
+				st,pins {
+					SCL     = <&PIO19 0      OUT   ALT4>;
+				};
+			};
+
+			/* mtsr routing */
+			padcfg_spissc1_mtsr_pio14_3: spissc1_mtsr_pio14_3 {
+				st,pins {
+					MTSR     = <&PIO14 3      OUT   ALT1>;
+				};
+			};
+			padcfg_spissc1_mtsr_pio11_1: spissc1_mtsr_pio11_1 {
+				st,pins {
+					MTSR     = <&PIO11 1      OUT   ALT2>;
+				};
+			};
+			padcfg_spissc1_mtsr_pio19_1: spissc1_mtsr_pio19_1 {
+				st,pins {
+					MTSR     = <&PIO19 1      OUT   ALT4>;
+				};
+			};
+
+			/* mrst routing */
+			padcfg_spissc1_mrst_pio14_4: spissc1_mrst_pio14_4 {
+				st,pins {
+					MRST     = <&PIO14 4      IN   ALT1>;
+				};
+			};
+			padcfg_spissc1_mrst_pio11_2: spissc1_mrst_pio11_2 {
+				st,pins {
+					MRST     = <&PIO11 2      IN   ALT2>;
+				};
+			};
+			padcfg_spissc1_mrst_pio19_2: spissc1_mrst_pio19_2 {
+				st,pins {
+					MRST     = <&PIO19 2      IN   ALT4>;
+				};
+			};
+		};
+
+		spissc2 {
+			/* sclk routing */
+			padcfg_spissc2_sclk_pio14_5: spissc2_sclk_pio14_5 {
+				st,pins {
+					SCL     = <&PIO14 5      OUT   ALT1>;
+				};
+			};
+
+			padcfg_spissc2_sclk_pio12_5: spissc2_sclk_pio12_5 {
+				st,pins {
+					SCL     = <&PIO12 5      OUT   ALT2>;
+				};
+			};
+
+			padcfg_spissc2_sclk_pio15_5: spissc2_sclk_pio15_5 {
+				st,pins {
+					SCL     = <&PIO15 5      OUT   ALT2>;
+				};
+			};
+
+			/* mtsr routing */
+			padcfg_spissc2_mtsr_pio14_6: spissc2_mtsr_pio14_6 {
+				st,pins {
+					MTSR     = <&PIO14 6      OUT   ALT1>;
+				};
+			};
+			padcfg_spissc2_mtsr_pio12_6: spissc2_mtsr_pio12_6 {
+				st,pins {
+					MTSR     = <&PIO12 6      OUT   ALT2>;
+				};
+			};
+			padcfg_spissc2_mtsr_pio15_6: spissc2_mtsr_pio15_6 {
+				st,pins {
+					MTSR     = <&PIO15 6      OUT   ALT2>;
+				};
+			};
+
+			/* mrst routing */
+			padcfg_spissc2_mrst_pio14_7: spissc2_mrst_pio14_7 {
+				st,pins {
+					MRST     = <&PIO14 7      IN   ALT1>;
+				};
+			};
+			padcfg_spissc2_mrst_pio12_7: spissc2_mrst_pio12_7 {
+				st,pins {
+					MRST     = <&PIO12 7      IN   ALT2>;
+				};
+			};
+			padcfg_spissc2_mrst_pio15_7: spissc2_mrst_pio15_7 {
+				st,pins {
+					MRST     = <&PIO15 7      IN   ALT2>;
+				};
+			};
+		};
+
+		spissc3 {
+			/* sclk routing */
+			padcfg_spissc3_sclk_pio18_5: spissc3_sclk_pio18_5 {
+				st,pins {
+					SCL     = <&PIO18 5      OUT   ALT1>;
+				};
+			};
+
+			padcfg_spissc3_sclk_pio13_5: spissc3_sclk_pio13_5 {
+				st,pins {
+					SCL     = <&PIO13 5      OUT   ALT3>;
+				};
+			};
+
+			padcfg_spissc3_sclk_pio17_6: spissc3_sclk_pio17_6 {
+				st,pins {
+					SCL     = <&PIO17 6      OUT   ALT1>;
+				};
+			};
+
+			/* mtsr routing */
+			padcfg_spissc3_mtsr_pio18_6: spissc3_mtsr_pio18_6 {
+				st,pins {
+					MTSR     = <&PIO18 6      OUT   ALT1>;
+				};
+			};
+			padcfg_spissc3_mtsr_pio13_6: spissc3_mtsr_pio13_6 {
+				st,pins {
+					MTSR     = <&PIO13 6      OUT   ALT3>;
+				};
+			};
+			padcfg_spissc3_mtsr_pio17_7: spissc3_mtsr_pio17_7 {
+				st,pins {
+					MTSR     = <&PIO17 7      OUT   ALT1>;
+				};
+			};
+
+			/* mrst routing */
+			padcfg_spissc3_mrst_pio18_7: spissc3_mrst_pio18_7 {
+				st,pins {
+					MRST     = <&PIO18 7      IN   ALT1>;
+				};
+			};
+			padcfg_spissc3_mrst_pio13_7: spissc3_mrst_pio13_7 {
+				st,pins {
+					MRST     = <&PIO13 7      IN   ALT3>;
+				};
+			};
+			padcfg_spissc3_mrst_pio17_5: spissc3_mrst_pio17_5 {
+				st,pins {
+					MRST     = <&PIO17 5      IN   ALT1>;
+				};
+			};
+		};
+
+		spissc4 {
+			/* sclk routing */
+			padcfg_spissc4_sclk_pio30_0: spissc4_sclk_pio30_0 {
+				st,pins {
+					SCL     = <&PIO30 0      OUT   ALT1>;
+				};
+			};
+
+			padcfg_spissc4_sclk_pio34_0: spissc4_sclk_pio34_0 {
+				st,pins {
+					SCL     = <&PIO34 0      OUT   ALT3>;
+				};
+			};
+
+			/* mtsr routing */
+			padcfg_spissc4_mtsr_pio30_1: spissc4_mtsr_pio30_1 {
+				st,pins {
+					MTSR     = <&PIO30 1      OUT   ALT1>;
+				};
+			};
+			padcfg_spissc4_mtsr_pio34_1: spissc4_mtsr_pio34_1 {
+				st,pins {
+					MTSR     = <&PIO34 1      OUT   ALT3>;
+				};
+			};
+
+			/* mrst routing */
+			padcfg_spissc4_mrst_pio30_2: spissc4_mrst_pio30_2 {
+				st,pins {
+					MRST     = <&PIO30 2      IN   ALT1>;
+				};
+			};
+			padcfg_spissc4_mrst_pio34_2: spissc4_mrst_pio34_2 {
+				st,pins {
+					MRST     = <&PIO34 2      IN   ALT3>;
+				};
+			};
+		};
+
+		/* No spi mode for SSC5 */
+
+		spissc10 {
+			padcfg_spissc10: spissc10 {
+				st,pins {
+					SCL	= <&PIO4 5	OUT	ALT1>;
+					MTSR	= <&PIO4 6	OUT	ALT1>;
+					MRST	= <&PIO4 7	IN	ALT1>;
+				};
+			};
+		};
+
+		spissc11 {
+			padcfg_spissc11: spissc11 {
+				st,pins {
+					SCL	= <&PIO3 2	OUT	ALT2>;
+					MTSR	= <&PIO3 1	OUT	ALT2>;
+					MRST	= <&PIO3 0	IN	ALT2>;
+				};
+			};
+		};
+
+		spissc12 {
+			padcfg_spissc12: spissc12 {
+				st,pins {
+					SCL	= <&PIO3 7	OUT	ALT2>;
+					MTSR	= <&PIO3 6	OUT	ALT2>;
+					MRST	= <&PIO3 4	IN	ALT2>;
+				};
+			};
+		};
+
+		gmac1{
+			padcfg_mii1: mii1 {
+				st,pins {
+					 txd0  =	<&PIO0  0	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txd1  =	<&PIO0  1	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txd2  =	<&PIO0  2	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txd3  =	<&PIO0  3	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txer =		<&PIO0  4	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txen =		<&PIO0  5	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txclk =	<&PIO0  6	IN 	ALT1	NICLK		0	CLK_A>;
+					 col =		<&PIO0  7	IN 	ALT1	BYPASS 		0>;
+
+					 mdio =		<&PIO1  0	OUT 	ALT1	BYPASS		1500>;
+					 mdc =		<&PIO1  1	OUT 	ALT1	NICLK		0	CLK_A>;
+					 crs =		<&PIO1  2	IN 	ALT1	BYPASS		0>;
+					 mdint =	<&PIO1  3	IN 	ALT1	BYPASS		0>;
+					 rxd0  =	<&PIO1  4	IN 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 rxd1  =	<&PIO1  5	IN 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 rxd2  =	<&PIO1  6	IN 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 rxd3  =	<&PIO1  7	IN 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+
+					 rxdv =		<&PIO2  0	IN 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 rx_er =	<&PIO2  1	IN 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 rxclk =	<&PIO2  2	IN 	ALT1	NICLK		0	CLK_A>;
+
+				};
+			};
+
+			padcfg_mii1_phyclk: mii1_phyclk {
+				st,pins {
+					 phyclk =	<&PIO2  3	OUT 	ALT2	NICLK		0	CLK_A>;
+				};
+			};
+			padcfg_mii1_phyclk_ext: mii_phyclk_ext {
+				st,pins {
+					 phyclk =	<&PIO2  3	IGNR 	ALT1	NICLK		0	CLK_A>;
+				};
+			};
+
+			padcfg_gmii1: gmii1 {
+					st,pins {
+					 txd0  =	<&PIO0  0	OUT 	ALT1	SE_NICLK_IO 	0 	CLK_A>;
+					 txd1  =	<&PIO0  1	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txd2  =	<&PIO0  2	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txd3  =	<&PIO0  3	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txer =		<&PIO0  4	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txen =		<&PIO0  5	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txclk =	<&PIO0  6	IN 	ALT1	NICLK		0	CLK_A>;
+					 col =		<&PIO0  7	IN 	ALT1	BYPASS		0>;
+
+					 mdio =		<&PIO1  0	OUT 	ALT1	BYPASS		0>;
+					 mdc =		<&PIO1  1	OUT 	ALT1	NICLK		0	CLK_A>;
+
+					 crs =		<&PIO1  2	IN 	ALT1	BYPASS		00>;
+					 mdint =	<&PIO1  3	IN 	ALT1	BYPASS		0>;
+					 rxd0  =	<&PIO1  4	IN 	ALT1	SE_NICLK_IO	00 	CLK_A>;
+					 rxd1  =	<&PIO1  5	IN 	ALT1	SE_NICLK_IO	00 	CLK_A>;
+					 rxd2  =	<&PIO1  6	IN 	ALT1	SE_NICLK_IO	00 	CLK_A>;
+					 rxd3  =	<&PIO1  7	IN 	ALT1	SE_NICLK_IO	00 	CLK_A>;
+
+					 rxdv =		<&PIO2  0	IN 	ALT1	SE_NICLK_IO	00 	CLK_A>;
+					 rx_er =	<&PIO2  1	IN 	ALT1	SE_NICLK_IO	00 	CLK_A>;
+					 rxclk =	<&PIO2  2	IN 	ALT1	NICLK		1500	CLK_A>;
+
+					 txd4  =	<&PIO2  6	OUT 	ALT4	SE_NICLK_IO	0 	CLK_A>;
+					 txd5  =	<&PIO2  7	OUT 	ALT4	SE_NICLK_IO	0 	CLK_A>;
+
+					 rxd4  =	<&PIO3  0	IN 	ALT4	SE_NICLK_IO	00 	CLK_A>;
+					 rxd5  =	<&PIO3  1	IN 	ALT4	SE_NICLK_IO	00 	CLK_A>;
+					 rxd6  =	<&PIO3  2	IN 	ALT4	SE_NICLK_IO	00 	CLK_A>;
+					 rxd7  =	<&PIO3  3	IN 	ALT4	SE_NICLK_IO	00 	CLK_A>;
+
+					 clk125 =	<&PIO3  7	IN 	ALT4	NICLK		0	CLK_A>;
+
+					 txd6  =	<&PIO4  1	OUT 	ALT4	SE_NICLK_IO	0 	CLK_A>;
+					 txd7  =	<&PIO4  2	OUT 	ALT4	SE_NICLK_IO	0 	CLK_A>;
+				};
+			};
+			padcfg_gmii1_phyclk: gmii1_phyclk {
+				st,pins {
+					 phyclk =       <&PIO2  3       OUT     ALT4    NICLK           500    CLK_B>;
+				};
+			};
+			padcfg_gmii1_phyclk_ext: gmii1_phyclk_ext {
+				st,pins {
+					 phyclk =       <&PIO2  3       OUT     ALT4    NICLK           3000    CLK_A>;
+				};
+			};
+
+			padcfg_rgmii1: rgmii1-0 {
+				st,pins {
+
+					 txd0  =	<&PIO0  0	OUT 	ALT1	DE_IO	0 	CLK_A>;
+					 txd1  =	<&PIO0  1	OUT 	ALT1	DE_IO	0 	CLK_A>;
+					 txd2  =	<&PIO0  2	OUT 	ALT1	DE_IO	0 	CLK_A>;
+					 txd3  =	<&PIO0  3	OUT 	ALT1	DE_IO	0 	CLK_A>;
+					 txen  =	<&PIO0  5	OUT 	ALT1	DE_IO	0 	CLK_A>;
+					 txclk =	<&PIO0  6	IN 	ALT1	NICLK	0	CLK_A>;
+
+					 rxd0  =	<&PIO1  4	IN 	ALT1	DE_IO	0 	CLK_A>;
+					 rxd1  =	<&PIO1  5	IN 	ALT1	DE_IO	0 	CLK_A>;
+					 rxd2  =	<&PIO1  6	IN 	ALT1	DE_IO	0 	CLK_A>;
+					 rxd3  =	<&PIO1  7	IN 	ALT1	DE_IO	0 	CLK_A>;
+					 rxdv =		<&PIO2  0	IN 	ALT1	DE_IO	0	CLK_A>;
+
+					 rxclk =	<&PIO2  2	IN 	ALT1	NICLK	500	CLK_A>;
+
+					 clk125=	<&PIO3  7	IN 	ALT4	NICLK	0	CLK_A>;
+				};
+			};
+
+			padcfg_rgmii1_phyclk: rgmii1_phyclk {
+				st,pins{
+					phyclk =	<&PIO2  3	OUT	ALT4	NICLK	1750	CLK_B>;
+				};
+			};
+
+			padcfg_rgmii1_phyclk_ext: rgmii1_phyclk_ext {
+				st,pins{
+					phyclk =	<&PIO2  3	OUT	ALT4	NICLK	1750	CLK_A>;
+				};
+			};
+			padcfg_rgmii1_mdio: rgmii1_mdio {
+				st,pins{
+					mdio =         <&PIO1  0       OUT     ALT1    BYPASS          750>;
+					mdc =          <&PIO1  1       OUT     ALT1    NICLK   0    CLK_A>;
+				};
+			};
+
+			padcfg_rmii1: rmii1-0 {
+				st,pins {
+					 txd0  =	<&PIO0  0	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txd1  =	<&PIO0  1	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 txen =		<&PIO0  5	OUT 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+					 mdio =		<&PIO1  0	OUT 	ALT1	BYPASS		0>;
+					 mdc =		<&PIO1  1	OUT 	ALT1	NICLK		0	CLK_A>;
+					 mdint =	<&PIO1  3	IN 	ALT1	BYPASS		0>;
+					 rxd0  =	<&PIO1  4	IN 	ALT1	SE_NICLK_IO	0 	CLK_B>;
+					 rxd1  =	<&PIO1  5	IN 	ALT1	SE_NICLK_IO	0 	CLK_B>;
+					 rxdv =		<&PIO2  0	IN 	ALT1	SE_NICLK_IO	0 	CLK_B>;
+					 rx_er =	<&PIO2  1	IN 	ALT1	SE_NICLK_IO	0 	CLK_A>;
+				};
+			};
+
+			padcfg_rmii1_phyclk: rmii1_phyclk {
+				st,pins {
+					 phyclk =	<&PIO2  3	OUT 	ALT2	NICLK	0	CLK_A>;
+				};
+			};
+			padcfg_rmii1_phyclk_ext: rmii1_phyclk_ext {
+				st,pins {
+					 phyclk =	<&PIO2  3	OUT 	ALT1	NICLK	0	CLK_A>;
+				};
+			};
+			padcfg_revmii1: revmii1-0 {
+				st,pins {
+					 txd0  =	<&PIO0  0	OUT 	ALT1	SE_NICLK_IO	0 	CLK_B>;
+					 txd1  =	<&PIO0  1	OUT 	ALT1	SE_NICLK_IO	0 	CLK_B>;
+					 txd2  =	<&PIO0  2	OUT 	ALT1	SE_NICLK_IO	0 	CLK_B>;
+					 txd3  =	<&PIO0  3	OUT 	ALT1	SE_NICLK_IO	0 	CLK_B>;
+					 txer =		<&PIO0  4	OUT 	ALT1	SE_NICLK_IO	0 	CLK_B>;
+					 txen =		<&PIO0  5	OUT 	ALT1	SE_NICLK_IO	0 	CLK_B>;
+					 txclk =	<&PIO0  6	IN 	ALT1	NICLK		0	CLK_A>; /* FIXME */
+					 col =		<&PIO0  7	OUT 	ALT2	BYPASS		0>;
+
+
+					 rxdv =		<&PIO2  0	IN 	ALT1	SE_NICLK_IO	500 	CLK_B>;
+					 rx_er =	<&PIO2  1	IN 	ALT1	SE_NICLK_IO	500 	CLK_B>;
+					 rxclk =	<&PIO2  2	IN 	ALT1	NICLK		0	CLK_A>; /* FIXME */
+					 phyclk =	<&PIO2  3	IGNR 	ALT1	NICLK		0	CLK_A>;
+
+					 mdio =		<&PIO1  0	OUT 	ALT1	BYPASS		500>;
+					 mdc =		<&PIO1  1	OUT 	ALT2	NICLK		0	CLK_B>;
+					 crs =		<&PIO1  2	OUT 	ALT2	BYPASS		0>;
+					 mdint =	<&PIO1  3	IN 	ALT1	BYPASS		0>;
+					 rxd0  =	<&PIO1  4	IN 	ALT1	SE_NICLK_IO	500 	CLK_B>;
+					 rxd1  =	<&PIO1  5	IN 	ALT1	SE_NICLK_IO	500 	CLK_B>;
+					 rxd2  =	<&PIO1  6	IN 	ALT1	SE_NICLK_IO	500 	CLK_B>;
+					 rxd3  =	<&PIO1  7	IN 	ALT1	SE_NICLK_IO	500 	CLK_B>;
+				};
+			};
+		};
+
+		rc {
+			padcfg_ir: ir0 {
+				st,pins {
+					ir	= <&PIO4 0	IN	ALT2>;
+				};
+			};
+			padcfg_uhf: uhf {
+				st,pins {
+					gpio-1	= <&PIO4 1	IN	ALT2>;
+				};
+			};
+			padcfg_tx: tx {
+				st,pins {
+					gpio-2	= <&PIO4 2	OUT	ALT2>;
+				};
+			};
+			padcfg_tx_od: tx_od {
+				st,pins {
+					gpio-3	= <&PIO4 3	OUT	ALT2>;
+				};
+			};
+		};
+
+		usb3 {
+			padcfg_usb3: usb3 {
+				st,pins {
+					usb-oc-detect	= <&PIO35 4 IN	ALT1>;
+					usb-pwr-enable	= <&PIO35 5 OUT	ALT1>;
+					usb-vbus-valid	= <&PIO35 6 IN	ALT1>;
+				};
+			};
+		};
+
+		snd_uni_player1 {
+			padcfg_i2s_8ch_out: padcfg-i2s-8ch-out {
+				st,pins {
+					MCLK   = <&PIO33 5	OUT	ALT1>;
+					SCLK   = <&PIO33 6	OUT	ALT1>;
+					LRCLK  = <&PIO33 7	OUT	ALT1>;
+					DATA0  = <&PIO33 4	OUT	ALT1>;
+					DATA1  = <&PIO34 0	OUT	ALT1>;
+					DATA2  = <&PIO34 1	OUT	ALT1>;
+					DATA3  = <&PIO34 2	OUT	ALT1>;
+				};
+			};
+		};
+
+		snd_uni_player3 {
+			padcfg_spdif_out: padcfg-spdif-out {
+				st,pins {
+					SPDIF  = <&PIO34 7	OUT	ALT1>;
+				};
+			};
+		};
+
+		snd_uni_reader0 {
+			padcfg_i2s_8ch_in: padcfg-i2s-8ch-in {
+				st,pins {
+					MCLK   = <&PIO32 5	IN	ALT1>;
+					SCLK   = <&PIO32 6	IN	ALT1>;
+					LRCLK  = <&PIO32 7	IN	ALT1>;
+					DATA0  = <&PIO32 4	IN	ALT1>;
+					DATA1  = <&PIO33 0	IN	ALT1>;
+					DATA2  = <&PIO33 1	IN	ALT1>;
+					DATA3  = <&PIO33 2	IN	ALT1>;
+				};
+			};
+		};
+
+		keyscan {
+			padcfg_keyscan: keyscan {
+				st,pins {
+					keyin0  = <&PIO4 0	IN	ALT6>;
+					keyin1  = <&PIO4 5	IN	ALT4>;
+					keyin2  = <&PIO0 4	IN	ALT2>;
+					keyin3  = <&PIO2 6	IN	ALT2>;
+
+					keyout0 = <&PIO4 6	OUT	ALT4>;
+					keyout1 = <&PIO1 7	OUT	ALT2>;
+					keyout2 = <&PIO0 6	OUT	ALT2>;
+					keyout3 = <&PIO2 7	OUT	ALT2>;
+				};
+			};
+		};
+	};
+};

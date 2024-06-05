@@ -1,0 +1,29 @@
+===============================================================================
+			stm bi-phase formatter converter
+===============================================================================
+
+Required properties:
+- compatible	 : Should be "st,snd_conv_biphase".
+- source-bus-id  : Player device is attached to.
+- channel-to	 : Output channel (usually 1).
+- channel-from	 : Input channel (usually 0).
+- biphase-enable : Sysconf field to enable/disable bi-phase formatter
+- biphase-idle	 : Sysconf field to set bi-phase formatter idle value
+- biphase-idle-value : Bi-phase formatter idle value (usually 0)
+
+Optional properties
+- format		: Bitmask of the supported converter audio format
+- oversampling		: Number of time oversampling (default is 256)
+
+Typical usage example:
+
+snd_conv_biphase: snd-conv-biphase {
+	compatible	= "st,snd_conv_biphase";
+	status		= "disabled";
+	source-bus-id	= "snd_uni_player.4";
+	channel-to	= <1>;
+	channel-from	= <0>;
+	biphase-enable	= <&sysconf 918 7 7>;
+	biphase-idle	= <&sysconf 918 8 8>;
+	biphase-idle-value = <0>;
+};

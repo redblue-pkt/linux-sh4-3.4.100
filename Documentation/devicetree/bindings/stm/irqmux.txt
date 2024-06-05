@@ -1,0 +1,58 @@
+
+
+===============================================================================
+			stm irqmux
+===============================================================================
+
+Required properties:
+- compatible : "st,irqmux".
+- reg, reg-names, interrupts, interrupt-names	: Standard way to define device
+			resources with names. look in
+			Documentation/devicetree/bindings/resource-names.txt
+- irqmux-name	: Should be name of the irqmux.
+- irqmux-inputs : Should be number of inputs to irqmux.
+- irqmux-outputs: Should be number of outputs to irqmux.
+- interrupts-enable: Binary flag to enable or disable all interrupts in irqmux.
+- irqmux-map    : when the generic modulo-mapping formula can not be used a static
+		  mapping shouldn be provided;
+		  Each map-entry is a set of 5 longs with the following struture:
+		  - begin   : defines the first input mapped;
+		  - size    : defines how many inputs are mapped;
+		  - output  : defines the output on where the inputs are routed;
+		  - enabled : defines if the inputs are enabled or not;
+		  - inverted: defines ir the inputs are inverted or not;
+
+Example:
+	irqmuxs{
+		#interrupt-cells = <3>;
+        #address-cells = <1>;
+        #size-cells = <1>;
+		ranges;
+		irqmux@fea28800{
+			compatible      = "st,irqmux";
+			interrupt-parent = <&intc>;
+			reg = <0xfea28800 0x800>;
+			irqmux-name = "A9 IRQ-MUX";
+			irqmux-inputs = <173>;
+			irqmux-outputs = <51>;
+			interrupts-enable;
+		};
+		irqmux@fea28000{
+			compatible      = "st,irqmux";
+			interrupt-parent = <&intc>;
+			reg = <0xfea28000 0x800>;
+			irqmux-name = "PIO IRQ-MUX";
+			irqmux-inputs = <27>;
+			irqmux-outputs = <10>;
+			interrupts-enable;
+			irqmux-map = <   0  9 1 1 0
+					 9 10 0 1 0
+					19  1 2 1 0
+					20  1 3 1 0
+					21  1 4 1 0
+					22  1 5 1 0
+					23  4 6 1 0 >;
+		 };
+		...
+		...
+	};

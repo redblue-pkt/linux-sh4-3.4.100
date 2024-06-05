@@ -30,6 +30,11 @@ enum cpu_type {
 	CPU_SH7750, CPU_SH7750S, CPU_SH7750R, CPU_SH7751, CPU_SH7751R,
 	CPU_SH7760, CPU_SH4_202, CPU_SH4_501,
 
+	/* SH-4 (ST40) types */
+	CPU_STIH415,
+	CPU_STXH205, CPU_STXH237, CPU_STXH273,
+	CPU_STX7108,
+
 	/* SH-4A types */
 	CPU_SH7763, CPU_SH7770, CPU_SH7780, CPU_SH7781, CPU_SH7785, CPU_SH7786,
 	CPU_SH7723, CPU_SH7724, CPU_SH7757, CPU_SHX3,
@@ -55,6 +60,13 @@ enum cpu_family {
 	CPU_FAMILY_UNKNOWN,
 };
 
+enum cpu_family_variant {
+	CPU_VARIANT_SH4_102,
+	CPU_VARIANT_SH4_103,
+	CPU_VARIANT_SH4_202,
+	CPU_VARIANT_ST40_300,
+	CPU_VARIANT_UNKNOWN,
+};
 /*
  * TLB information structure
  *
@@ -72,7 +84,7 @@ struct tlb_info {
 };
 
 struct sh_cpuinfo {
-	unsigned int type, family;
+	unsigned int type, family, variant;
 	int cut_major, cut_minor;
 	unsigned long loops_per_jiffy;
 	unsigned long asid_cache;
@@ -100,6 +112,9 @@ extern struct sh_cpuinfo cpu_data[];
 
 #define cpu_sleep()	__asm__ __volatile__ ("sleep" : : : "memory")
 #define cpu_relax()	barrier()
+
+void disable_hlt(void);
+void enable_hlt(void);
 
 void default_idle(void);
 void cpu_idle_wait(void);

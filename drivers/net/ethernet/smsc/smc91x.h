@@ -191,6 +191,61 @@ SMC_outw(u16 val, void __iomem *ioaddr, int reg)
 
 #define SMC_IRQ_FLAGS		(0)
 
+#elif defined(CONFIG_CPU_SUBTYPE_ST40)
+
+#if defined(CONFIG_SH_ST_MB411) || \
+      defined(CONFIG_SH_ST_MB442) || \
+      defined(CONFIG_SH_ST_MB448)
+/* 16 bit on board SMC91C111. No address shifting required.
+ * Note we can't set SMC_CAN_USE_32BIT. This would causes SMC_SELECT_BANK
+ * to do a SMC_outl, which on a 16 bit bus translates into two 16 bit writes.
+ * This bypasses the special logic which would prevent this also updating
+ * this interrupt mask register. */
+#define SMC_CAN_USE_8BIT	1
+#define SMC_CAN_USE_16BIT	1
+#define SMC_CAN_USE_32BIT	0
+#define SMC_CAN_USE_32BIT_DATA	1
+#define SMC_IO_SHIFT		0
+#else
+#error Unknown board
+#endif
+
+#define SMC_NOWAIT		0
+#define SMC_IRQ_FLAGS		0
+
+#ifdef SMC_STEM_BS_MASK
+/*
+ * We have to shift all addresses up by 1, because the STEM
+ * module connects A2 from the CPU to to A1 on the SMC device.
+ * This was done for compatibility with the ST20 EMI, which
+ * apparently does the opposite.
+ * However the byte strobes are not shifted in hardware, so
+ * these need to be left in place.
+ */
+#define REG_OFFSET(base,reg) ({                         		\
+        u_int __reg = (reg);                            		\
+        __reg = ( (__reg & (~SMC_STEM_BS_MASK))                 ) |	\
+                ( (__reg & ( SMC_STEM_BS_MASK)) >> SMC_IO_SHIFT );	\
+	(void __iomem *)((base) + __reg); })
+#else
+#define REG_OFFSET(base,reg) ((void __iomem*)((base) + (reg)))
+#endif
+
+#define dprintk(str, ...) // printk(str, ## __VA_ARGS__)
+#define SMC_inb(a, r)		({ void __iomem *_p = REG_OFFSET((a), (r)); u8  _v = readb(_p); dprintk("SMC_inb(%08p) = %02x\n", _p, _v); _v; })
+#define SMC_inw(a, r)		({ void __iomem *_p = REG_OFFSET((a), (r)); u16 _v = readw(_p); dprintk("SMC_inw(%08p) = %04x\n", _p, _v); _v; })
+#define SMC_inl(a, r)		({ void __iomem *_p = REG_OFFSET((a), (r)); u32 _v = readl(_p); dprintk("SMC_inl(%08p) = %08x\n", _p, _v); _v; })
+#define SMC_outb(v, a, r)	({ void __iomem *_p = REG_OFFSET((a), (r)); u8  _v = (v);  dprintk("SMC_outb(%02x, %08p)\n", _v, _p); writeb(_v, _p); })
+#define SMC_outw(v, a, r)	({ void __iomem *_p = REG_OFFSET((a), (r)); u16 _v = (v);  dprintk("SMC_outw(%04x, %08p)\n", _v, _p); writew(_v, _p); })
+#define SMC_outl(v, a, r)	({ void __iomem *_p = REG_OFFSET((a), (r)); u32 _v = (v);  dprintk("SMC_outl(%08x, %08p)\n", _v, _p); writel(_v, _p); })
+#define SMC_insl(a, r, p, l)	({ void __iomem *_p = REG_OFFSET((a), (r)); readsl(_p, p, l); })
+#define SMC_outsl(a, r, p, l)	({ void __iomem *_p = REG_OFFSET((a), (r)); writesl(_p, p, l); })
+
+#define set_irq_type(irq, type)
+
+#define RPC_LSA_DEFAULT		RPC_LED_TX_RX
+#define RPC_LSB_DEFAULT		RPC_LED_100_10
+
 #elif   defined(CONFIG_M32R)
 
 #define SMC_CAN_USE_8BIT	0
@@ -445,7 +500,7 @@ smc_pxa_dma_irq(int dma, void *dummy)
  * use of them.
  */
 
-#if ! SMC_CAN_USE_32BIT
+#if ! (SMC_CAN_USE_32BIT || SMC_CAN_USE_32BIT_DATA)
 #define SMC_inl(ioaddr, reg)		({ BUG(); 0; })
 #define SMC_outl(x, ioaddr, reg)	BUG()
 #define SMC_insl(a, r, p, l)		BUG()
@@ -1104,7 +1159,7 @@ static const char * chip_ids[ 16 ] =  {
 
 #define SMC_PUSH_DATA(lp, p, l)					\
 	do {								\
-		if (SMC_32BIT(lp)) {				\
+		if (SMC_32BIT(lp) || SMC_CAN_USE_32BIT_DATA) {		\
 			void *__ptr = (p);				\
 			int __len = (l);				\
 			void __iomem *__ioaddr = ioaddr;		\
@@ -1130,7 +1185,7 @@ static const char * chip_ids[ 16 ] =  {
 
 #define SMC_PULL_DATA(lp, p, l)					\
 	do {								\
-		if (SMC_32BIT(lp)) {				\
+		if (SMC_32BIT(lp) || SMC_CAN_USE_32BIT_DATA) {		\
 			void *__ptr = (p);				\
 			int __len = (l);				\
 			void __iomem *__ioaddr = ioaddr;		\
@@ -1162,5 +1217,22 @@ static const char * chip_ids[ 16 ] =  {
 		else if (SMC_8BIT(lp))				\
 			SMC_insb(ioaddr, DATA_REG(lp), p, l);		\
 	} while (0)
+
+#if defined(CONFIG_SH_STI5528_ESPRESSO)
+/*
+ * The Espresso doesn't appear to correctly connect the SMSC's ARDY pin
+ * to the 5528's WAIT pin. The only time this has been observed to be a
+ * problem is after setting the pointer register there may be insufficient
+ * delay before reading from the FIFO. Insert a delay here.
+ */
+#undef SMC_SET_PTR
+#define SMC_SET_PTR(x)							\
+	do {								\
+		unsigned int __val16 = (x);				\
+		SMC_outw( __val16, ioaddr, PTR_REG );			\
+		if (__val16 & PTR_READ)					\
+			ndelay(370);					\
+	} while (0)
+#endif
 
 #endif  /* _SMC91X_H_ */

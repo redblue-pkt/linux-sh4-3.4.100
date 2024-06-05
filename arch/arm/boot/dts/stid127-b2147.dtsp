@@ -1,0 +1,27 @@
+/*
+ * Copyright (C) 2014 STMicroelectronics Limited.
+ * Author: Carmelo Amoroso <carmelo.amoroso@st.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * publishhed by the Free Software Foundation.
+ */
+/dts-v1/;
+
+#include "stid127.dtsi"
+#include "stid127-b2147x.dtsi"
+
+/ {
+	model = "stid127 B2147 REV A";
+	compatible = "st,stid127", "st,stid127-b2147";
+
+	soc {
+		pcie0: pcie@fef20000{
+			st,reset-gpio = <&PIO21 4 0>;
+		};
+
+		pcie1: pcie@fef30000{
+			st,reset-gpio = <&PIO8 7 0>;
+		};
+	};
+};

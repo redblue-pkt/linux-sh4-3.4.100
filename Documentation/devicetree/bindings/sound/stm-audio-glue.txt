@@ -1,0 +1,64 @@
+===============================================================================
+			stm audio glue
+===============================================================================
+
+Required properties:
+- compatible	: Should be "st,snd_audio_glue".
+- device-config	: phandle to device config.
+
+Typical usage example:
+
+snd_audio_glue: snd-audio-glue {
+	compatible	= "st,snd_audio_glue";
+	status		= "disabled";
+	device-config	= <&audio_glue_config>;
+
+	audio_glue_config: audio-glue-config {
+		device-seqs	= <&audio_glue_dev_seqs>;
+		sysconfs {
+			READER_INPUT	= <&sysconf 918 6 6>;
+			EXT_DAC_OUTPUT	= <&sysconf 918 3 5>;
+			EXT_DAC_CLOCK	= <&sysconf 918 1 2>;
+			EXT_DAC_INVERT	= <&sysconf 918 0 0>;
+		};
+	};
+
+	audio_glue_dev_seqs: audio-glue-dev-seqs {
+		power-on-seq {
+			step0 {
+				READER_INPUT	= <0>;
+				type		= "sysconf";
+			};
+			step1 {
+				EXT_DAC_OUTPUT	= <1>;
+				type		= "sysconf";
+			};
+			step2 {
+				EXT_DAC_CLOCK	= <1>;
+				type		= "sysconf";
+			};
+			step3 {
+				EXT_DAC_INVERT	= <0>;
+				type		= "sysconf";
+			};
+		};
+		power-off-seq {
+			step0 {
+				READER_INPUT	= <0>;
+				type		= "sysconf";
+			};
+			step1 {
+				EXT_DAC_OUTPUT	= <0>;
+				type		= "sysconf";
+			};
+			step2 {
+				EXT_DAC_CLOCK	= <0>;
+				type		= "sysconf";
+			};
+			step3 {
+				EXT_DAC_INVERT	= <0>;
+				type		= "sysconf";
+			};
+		};
+	};
+};

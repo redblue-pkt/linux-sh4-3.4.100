@@ -338,13 +338,220 @@ config SH_APSH4AD0A
 	help
 	  Select AP-SH4AD-0A if configuring for an ALPHAPROJECT AP-SH4AD-0A.
 
-endmenu
+comment "ST Main Boards"
+
+config SH_ST_EPLD
+	bool
+	default n
+
+config SH_ST_STEM
+	bool
+	default n
+
+config SH_ST_STPM_HD_V1
+	bool
+	default n
+
+config SH_ST_STPM_HD_V2
+	bool
+	default n
+
+config SH_ST_STPM_SD
+	bool
+	default n
+
+config SH_ST_ADI7108
+	bool "ADI7108: STx7108-ADI Reference board"
+	depends on CPU_SUBTYPE_STX7108
+	select SYS_SUPPORTS_PCI
+	default n
+	help
+	  Select SH_ST_ADI7108 if configuring for a
+	  STMicroelectronics STi7108-ADI Reference Board.
+
+config SH_ST_B2000
+	bool "B2000: STiH415 (Orly) processor module board"
+	depends on CPU_SUBTYPE_STIH415
+	default n
+	help
+	  Select SH_ST_B2000 if configuring for a
+	  STMicroelectronics STiH415 (Orly) processor module board.
+
+config SH_ST_B2039
+	bool "B2039: STxH207-HVK (Liege) processor module board"
+	depends on CPU_SUBTYPE_STXH205
+	default n
+	help
+	  Select SH_ST_B2039 if configuring for a
+	  STMicroelectronics STxH207-HVK processor module board
+	  for a STxH207xUx (PBGA).
+
+config SH_ST_B2141
+	bool "B2141: STxH273 Reference board"
+	depends on CPU_SUBTYPE_STXH205
+	default n
+	help
+	  Select SH_ST_B2141 if configuring for a
+	  STMicroelectronics STxH273 Reference Board.
+
+config SH_ST_B2146
+	bool "B2146: STxH205-HDK reference board"
+	depends on CPU_SUBTYPE_STXH205
+	select SYS_SUPPORTS_PCI
+	default n
+	help
+	  Select SH_ST_B2146 if configuring for a
+	  STMicroelectronics B2146 STIH206 Reference Board.
+
+config SH_ST_B2176
+	bool "B2176: STxH237 Reference board"
+	depends on CPU_SUBTYPE_STXH205
+	default n
+	help
+	  Select SH_ST_B2176 if configuring for a
+	  STMicroelectronics STxH237 Reference Board.
+
+
+config SH_ST_B2057
+	bool "B2057: STxH207-HDK Reference board"
+	depends on CPU_SUBTYPE_STXH205
+	default n
+	help
+	  Select SH_ST_B2057 if configuring for a
+	  STMicroelectronics STxH207-HDK Reference Board.
+
+config SH_ST_B2064
+	bool "B2064: STxH239-HDK Reference board"
+	depends on CPU_SUBTYPE_STXH205
+	default n
+	help
+	  Select SH_ST_B2064 if configuring for a
+	  STMicroelectronics STxH239-HDK Reference Board.
+
+config SH_ST_B2066
+	bool "b2066: STi7108M Compact reference board"
+	depends on CPU_SUBTYPE_STX7108
+	select FIXED_PHY
+	help
+	  Select SH_ST_B2066 if configuring for a
+	  STMicroelectronics STi7108M Compact Reference Board.
+
+config SH_ST_B2067
+	bool "B2067: STxH238-HDK Reference board"
+	depends on CPU_SUBTYPE_STXH205
+	default n
+	help
+	  Select SH_ST_B2067 if configuring for a
+	  STMicroelectronics STxH238-HDK Reference Board.
+
+config SH_ST_B2075
+	bool "B2075: STxH205-HDK Reference board"
+	depends on CPU_SUBTYPE_STXH205
+	default n
+	help
+	  Select SH_ST_B2075 if configuring for a
+	  STMicroelectronics STxH205-HDK Reference Board.
+
+config SH_ST_B2076
+	bool "B2076: STxH207-HVK (LiegeC) processor module board"
+	depends on CPU_SUBTYPE_STXH205
+	select SYS_SUPPORTS_PCI
+	default n
+	help
+	  Select SH_ST_B2076 if configuring for a
+	  STMicroelectronics STxH207-HVK processor module board
+	  for a STxH207xKx (FPBGA).
+
+config SH_ST_B2108
+        bool "B2108: STxH205-OTT Reference board"
+        depends on CPU_SUBTYPE_STXH205
+        default n
+        help
+          Select SH_ST_B2108 if configuring for a
+          STMicroelectronics STxH205-OTT Reference Board.
+
+config SH_ST_B2157
+	bool "B2157: STxH234-HDK Reference board"
+	depends on CPU_SUBTYPE_STXH205
+	default n
+	help
+	  Select SH_ST_B2157 if configuring for a
+	  STMicroelectronics STxH234-HDK Reference Board.
+
+config SH_ST_HDK7108
+	bool "HDK7108: STx7108 Reference board"
+	depends on CPU_SUBTYPE_STX7108
+	select SYS_SUPPORTS_PCI
+	default n
+	help
+	  Select SH_ST_HDK7108 if configuring for a
+	  STMicroelectronics STi7108 Reference Board.
+
+config SH_ST_MB837
+	bool "mb837: STx7108 Validation board"
+	depends on CPU_SUBTYPE_STX7108
+	select SH_ST_STEM
+	select SH_ST_STPM_HD_V2
+	select SYS_SUPPORTS_PCI
+	default n
+	help
+	  Select STx7108 Validation if configuring for an
+	  STMicroelectronics STx7108 Validation Board (product code:
+	  STi7108-MBOARD, ST board ID: mb837).
+
+config SH_ST_MB903
+	bool "mb903: STi7108M Reference board"
+	depends on CPU_SUBTYPE_STX7108
+	select FIXED_PHY
+	help
+	  Select SH_ST_MB903 if configuring for a
+	  STMicroelectronics STi7108M Reference Board.
+
+comment "ST Generic Board options"
+
+config SH_ST_NO_MDINT
+	bool "PHY MDINT signal configuration"
+	depends on CPU_SUBTYPE_STXH205
+	default n
+	help
+	 Enable this option to disable the MDINT signal and force a phy device
+	 to work w/o interrupts (polling mode).
+
+comment "ST Peripheral Boards"
+
+config SH_ST_DB641
+	bool "db641: STEM board with double SMSC LAN9117 Ethernet interface"
+	depends on SH_ST_STEM
+	default n
+	help
+	  Supports DB641 STEM board. Only first port (CN1) is supported.
+	  See "arch/sh/boards/st/common/db641.c" for configuration
+	  informations.
+
+config SH_ST_MB588
+	bool "mb588: NAND Flash STEM board"
+	depends on SH_ST_STEM
+	default n
+	help
+	  Supports MB588 STEM board. See "arch/sh/boards/st/common/mb588.c"
+	  for configuration informations.
 
 source "arch/sh/boards/mach-r2d/Kconfig"
 source "arch/sh/boards/mach-highlander/Kconfig"
 source "arch/sh/boards/mach-sdk7780/Kconfig"
 source "arch/sh/boards/mach-migor/Kconfig"
 source "arch/sh/boards/mach-rsk/Kconfig"
+source "arch/sh/boards/mach-b2039/Kconfig"
+source "arch/sh/boards/mach-b2057/Kconfig"
+source "arch/sh/boards/mach-b2064/Kconfig"
+source "arch/sh/boards/mach-b2067/Kconfig"
+source "arch/sh/boards/mach-b2076/Kconfig"
+source "arch/sh/boards/mach-mb837/Kconfig"
+source "arch/sh/boards/mach-hdk7108/Kconfig"
+source "arch/sh/boards/mach-adi7108/Kconfig"
+source "arch/sh/boards/mach-b2000/Kconfig"
+
+endmenu
 
 if SH_MAGIC_PANEL_R2
 

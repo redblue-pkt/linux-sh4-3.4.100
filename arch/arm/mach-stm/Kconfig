@@ -1,0 +1,136 @@
+menu "STMicroelectronics Consumer Electronics platform type"
+	depends on ARCH_STM
+
+# CPU_SUBTYPE_xxx style names for code shared with SH4
+
+config CPU_SUBTYPE_STIH415
+       def_bool n
+
+config CPU_SUBTYPE_STIH416
+       def_bool n
+
+config MACH_STM_STID127
+	def_bool n
+	select STM_IRQ_MUX
+	help
+	  Include support for a generic STiD127 (Alicante) platform.
+
+config MACH_STM_STID127_BOARD
+	bool "Generic board support for StiD127 based boards via Device trees"
+	depends on OF
+	select MACH_STM_STID127
+	select FIXED_PHY
+	help
+	Include support for a Generic Board based on device trees for StiD127
+
+config MACH_STM_STIH407
+	def_bool n
+	select STM_HAS_MALI
+	help
+	  Include support for a generic STiH407 (Monaco) platform.
+
+config MACH_STM_STIH407_BOARD
+	bool "Generic board support for STiH407 based boards via Device trees"
+	depends on OF
+	select MACH_STM_STIH407
+	select FIXED_PHY
+	help
+	  Include support for a Generic Board based on device trees for
+	  StiH07 (Monaco/Cannes)
+
+config MACH_STM_STIH407_FIXED_1000_SPEED
+	bool "Force link speed to 1000"
+	depends on MACH_STM_STIH407_BOARD
+	help
+	  This is to use on the b2089 and b2120 boards the network and the
+	  embedded switch to use 1000 speed instead of 100 (default).
+	  A change is also required in the board dtsp file to set the extif speed
+	  to <2> for GiGa
+
+		realtek: rtl8367rb {
+		...
+			rtl8367rb,extif2-speed = <2>;
+		};
+
+config MACH_STM_STIH415
+	def_bool n
+	select CPU_SUBTYPE_STIH415
+	select ARCH_HAS_CPUFREQ
+	select STM_HAS_MALI
+	help
+	  Include support for a generic STiH415 (Orly) platform.
+
+config MACH_STM_STIH415_BOARD
+	bool "Generic board support for STiH415 based boards via Device trees"
+	depends on OF
+	select MACH_STM_STIH415
+	help
+	Include support for a Generic Board based on device trees for
+	StiH415 (Orly-1)
+
+config MACH_STM_STIH416
+	def_bool n
+	select ARCH_HAS_CPUFREQ
+	select CPU_SUBTYPE_STIH416
+	select STM_HAS_MALI
+	help
+	 Include support for a generic STiH416 (Orly-2) platform.
+
+config MACH_STM_STIH416_BOARD
+	bool "Generic board support for STiH416 based boards via Device trees"
+	depends on OF
+	select MACH_STM_STIH416
+	help
+	Include support for a Generic Board based on device trees for
+	StiH416 (Orly-2)
+
+config MACH_STM_B2000
+	bool "Support B2000 - STiH415/STiH416 (Orly/Orly-2) MBoard"
+	help
+	  Include support for a B2000 - STiH415/STiH416 (Orly/Orly-2) MBoard.
+
+# b2000 specific configuration
+source "arch/arm/mach-stm/Kconfig.b2000"
+
+config MACH_STM_B2020
+	bool "Support B2020 - STiH415/STiH416 (Orly-1/Orly-2) ADI Board"
+	help
+	  Include support for a B2020 - STiH415/STiH416 (Orly-1/Orly-2) ADI Board.
+
+# b2020 specific configuration
+source "arch/arm/mach-stm/Kconfig.b2020"
+
+config MACH_STM_B2092
+	bool "Support B2092 - STiH416 (Orly-2) MBoard"
+	select MACH_STM_STIH416
+	help
+	  Include support for a B2092 - STiH416 (Orly-2) MBoard.
+
+# b2092 specific configuration
+source "arch/arm/mach-stm/Kconfig.b2092"
+
+config MACH_STM_B2105
+	bool "Support B2105 - STiH416 (Orly-2) Zaragoza Premium board"
+	select MACH_STM_STIH416
+	select FIXED_PHY
+	help
+	  Include support for a B2105 - STiH416 (Orly-2) Zaragoza Premium board.
+
+config MACH_STM_B2116
+	bool "Support B2116 - STiH315 ADI board"
+	select MACH_STM_STIH416
+	help
+	  Include support for a B2116 - STiH315 ADI board.
+
+config MACH_STM_B2147
+	bool "Support B2147 - STiD127 (Alicante) Board"
+	depends on OF
+	select MACH_STM_STID127_BOARD
+	help
+	  Include support for B2147 Alicante Data Gateway board
+
+config STM_CPU_FREQ
+	def_bool CPU_FREQ
+	select CPU_FREQ_TABLE
+
+endmenu

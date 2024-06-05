@@ -67,12 +67,13 @@ static int part_read(struct mtd_info *mtd, loff_t from, size_t len,
 	stats = part->master->ecc_stats;
 	res = part->master->_read(part->master, from + part->offset, len,
 				  retlen, buf);
-	if (unlikely(res)) {
-		if (mtd_is_bitflip(res))
-			mtd->ecc_stats.corrected += part->master->ecc_stats.corrected - stats.corrected;
-		if (mtd_is_eccerr(res))
-			mtd->ecc_stats.failed += part->master->ecc_stats.failed - stats.failed;
-	}
+
+	mtd->ecc_stats.corrected += part->master->ecc_stats.corrected -
+		stats.corrected;
+	if (mtd_is_eccerr(res))
+		mtd->ecc_stats.failed += part->master->ecc_stats.failed -
+			stats.failed;
+
 	return res;
 }
 
@@ -108,12 +109,15 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 		struct mtd_oob_ops *ops)
 {
 	struct mtd_part *part = PART(mtd);
+	struct mtd_ecc_stats stats;
 	int res;
 
 	if (from >= mtd->size)
 		return -EINVAL;
 	if (ops->datbuf && from + ops->len > mtd->size)
 		return -EINVAL;
+
+	stats = part->master->ecc_stats;
 
 	/*
 	 * If OOB is also requested, make sure that we do not read past the end
@@ -133,12 +137,13 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 	}
 
 	res = part->master->_read_oob(part->master, from + part->offset, ops);
-	if (unlikely(res)) {
-		if (mtd_is_bitflip(res))
-			mtd->ecc_stats.corrected++;
-		if (mtd_is_eccerr(res))
-			mtd->ecc_stats.failed++;
-	}
+
+	mtd->ecc_stats.corrected += part->master->ecc_stats.corrected -
+		stats.corrected;
+	if (mtd_is_eccerr(res))
+		mtd->ecc_stats.failed += part->master->ecc_stats.failed -
+			stats.failed;
+
 	return res;
 }
 
@@ -371,6 +376,9 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	slave->mtd.owner = master->owner;
 	slave->mtd.backing_dev_info = master->backing_dev_info;
 
+	/* Flag MTD device as a slave partition */
+	slave->mtd.flags |= MTD_SLAVE_PARTITION;
+
 	/* NOTE:  we don't arrange MTDs as a tree; it'd be error-prone
 	 * to have the same data be in two different partitions.
 	 */
@@ -527,6 +535,10 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 		}
 	}
 
+	/* Set MTD_SPANS_MASTER if slave MTD spans entire master MTD */
+	if (slave->offset == 0 && slave->mtd.size == master->size)
+		slave->mtd.flags |= MTD_SPANS_MASTER;
+
 out_register:
 	return slave;
 }
@@ -646,6 +658,26 @@ int add_mtd_partitions(struct mtd_info *master,
 
 	return 0;
 }
+
+/*
+ * Retrieve a master's MTD slave object for the partition named @name.  If
+ * found, returns a pointer the Slave's mtd_info structure, and sets the @offset
+ * parameter.  Else, returns NULL.
+ */
+struct mtd_info *get_mtd_partition_slave(struct mtd_info *master, char *name,
+					 uint64_t *offset)
+{
+	struct mtd_part *slave, *next;
+
+	list_for_each_entry_safe(slave, next, &mtd_partitions, list)
+		if (slave->master == master &&
+		    strcmp(slave->mtd.name, name) == 0) {
+			*offset = slave->offset;
+			return &slave->mtd;
+		}
+	return NULL;
+}
+EXPORT_SYMBOL(get_mtd_partition_slave);
 
 static DEFINE_SPINLOCK(part_parser_lock);
 static LIST_HEAD(part_parsers);

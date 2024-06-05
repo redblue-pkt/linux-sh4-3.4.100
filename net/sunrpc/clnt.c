@@ -327,8 +327,10 @@ static struct rpc_clnt * rpc_new_client(const struct rpc_create_args *args, stru
 	clnt->cl_stats    = program->stats;
 	clnt->cl_metrics  = rpc_alloc_iostats(clnt);
 	err = -ENOMEM;
+#ifdef CONFIG_PROC_FS
 	if (clnt->cl_metrics == NULL)
 		goto out_no_stats;
+#endif
 	clnt->cl_program  = program;
 	INIT_LIST_HEAD(&clnt->cl_tasks);
 	spin_lock_init(&clnt->cl_lock);
@@ -377,7 +379,9 @@ out_no_path:
 	kfree(clnt->cl_principal);
 out_no_principal:
 	rpc_free_iostats(clnt->cl_metrics);
+#ifdef CONFIG_PROC_FS
 out_no_stats:
+#endif
 	kfree(clnt);
 out_err:
 	xprt_put(xprt);
@@ -509,8 +513,10 @@ rpc_clone_client(struct rpc_clnt *clnt)
 	spin_lock_init(&new->cl_lock);
 	rpc_init_rtt(&new->cl_rtt_default, clnt->cl_timeout->to_initval);
 	new->cl_metrics = rpc_alloc_iostats(clnt);
+#ifdef CONFIG_PROC_FS
 	if (new->cl_metrics == NULL)
 		goto out_no_stats;
+#endif
 	if (clnt->cl_principal) {
 		new->cl_principal = kstrdup(clnt->cl_principal, GFP_KERNEL);
 		if (new->cl_principal == NULL)
@@ -539,7 +545,9 @@ out_no_transport:
 	kfree(new->cl_principal);
 out_no_principal:
 	rpc_free_iostats(new->cl_metrics);
+#ifdef CONFIG_PROC_FS
 out_no_stats:
+#endif
 	kfree(new);
 out_no_clnt:
 	dprintk("RPC:       %s: returned error %d\n", __func__, err);

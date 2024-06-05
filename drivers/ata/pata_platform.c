@@ -44,6 +44,16 @@ static int pata_platform_set_mode(struct ata_link *link, struct ata_device **unu
 	return 0;
 }
 
+static void pata_platform_data_xfer(struct ata_device *adev,
+				    unsigned char *buf,
+				    unsigned int buflen, int write_data)
+{
+	ata_sff_data_xfer_noirq(adev, buf, buflen, write_data);
+	if (! write_data) {
+		__flush_wback_region(buf, buflen);
+	}
+}
+
 static struct scsi_host_template pata_platform_sht = {
 	ATA_PIO_SHT(DRV_NAME),
 };
@@ -52,6 +62,7 @@ static struct ata_port_operations pata_platform_port_ops = {
 	.inherits		= &ata_sff_port_ops,
 	.sff_data_xfer		= ata_sff_data_xfer_noirq,
 	.cable_detect		= ata_cable_unknown,
+	.sff_data_xfer		= pata_platform_data_xfer,
 	.set_mode		= pata_platform_set_mode,
 };
 

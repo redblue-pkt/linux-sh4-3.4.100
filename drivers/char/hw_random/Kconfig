@@ -236,6 +236,16 @@ config HW_RANDOM_PPC4XX
 
 	 If unsure, say N.
 
+config HW_RANDOM_STM
+	tristate "ST Microelectronics HW Random Number Generator support"
+	depends on HW_RANDOM && STM_DRIVERS
+	---help---
+	  This driver provides kernel-side support for the Random Number
+	  Generator hardware found on ST STx7109 and STx7200 SoCs.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called stm-rng.
+
 config UML_RANDOM
 	depends on UML
 	tristate "Hardware random number generator"

@@ -1,0 +1,30 @@
+* STMicroElectronics Secure Digital Host Controller
+
+Required properties:
+- compatible : Should be "st,sdhci"
+- reg : Should contain SD/MMC registers location and length
+- interrupts : Should contain SD/MMC interrupt
+
+Optional properties:
+- st,mmc-non-removable		Card is not removable i.e. eMMC
+- st,mmc-core-init		To call the Arasan Core init and configure
+				the host controller before accessing to its
+				registers and configuring the driver to
+				support one of the following SPEC:
+					0: ARASAN_EMMC_4_5
+					1: ARASAN_EMMC_4_3
+					2: ARASAN_SD_3_0
+					3: ARASAN_SD_2_0
+- st,mmc-auto-tuning		To program HW like the DLL in Monaco and allow
+				auto-tuning on super-speed selection.
+- st,mmc-has-vsense		To switch among different voltages.
+
+- st,no-hispd-bit		Do not have HISPD bit field in HI-SPEED SD card
+
+Example:
+
+sdhci@c8000200 {
+	compatible = "st,sdhci";
+	reg = <0xc8000200 0x200>;
+	interrupts = <47>;
+};

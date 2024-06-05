@@ -138,6 +138,8 @@ source "drivers/rpmsg/Kconfig"
 
 source "drivers/virt/Kconfig"
 
+source "drivers/stm/Kconfig"
+
 source "drivers/devfreq/Kconfig"
 
 endmenu

@@ -240,11 +240,12 @@ static void fixup_no_write_suspend(struct mtd_info *mtd)
 }
 #endif
 
-static void fixup_st_m28w320ct(struct mtd_info *mtd)
+static void fixup_st_m28wXX0_disable_bufferwrite(struct mtd_info *mtd)
 {
 	struct map_info *map = mtd->priv;
 	struct cfi_private *cfi = map->fldrv_priv;
 
+	printk(KERN_INFO "Using word write for ST M28WXX0 FLASH\n");
 	cfi->cfiq->BufWriteTimeoutTyp = 0;	/* Not supported */
 	cfi->cfiq->BufWriteTimeoutMax = 0;	/* Not supported */
 }
@@ -304,11 +305,18 @@ static struct cfi_fixup cfi_fixup_table[] = {
 #ifdef CMDSET0001_DISABLE_WRITE_SUSPEND
 	{ CFI_MFR_ANY, CFI_ID_ANY, fixup_no_write_suspend },
 #endif
+	{ CFI_MFR_ST, 0x00ba, /* M28W320CT */
+		fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x00bb, /* M28W320CB */ fixup_st_m28w320cb },
+	{ CFI_MFR_ST, 0x8857, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x8858, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x8859, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x880a, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x880b, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x880c, fixup_st_m28wXX0_disable_bufferwrite },
 #if !FORCE_WORD_WRITE
 	{ CFI_MFR_ANY, CFI_ID_ANY, fixup_use_write_buffers },
 #endif
-	{ CFI_MFR_ST, 0x00ba, /* M28W320CT */ fixup_st_m28w320ct },
-	{ CFI_MFR_ST, 0x00bb, /* M28W320CB */ fixup_st_m28w320cb },
 	{ CFI_MFR_INTEL, CFI_ID_ANY, fixup_unlock_powerup_lock },
 	{ 0, 0, NULL }
 };
@@ -1210,7 +1218,8 @@ static int inval_cache_and_wait_for_operation(
 	struct cfi_private *cfi = map->fldrv_priv;
 	map_word status, status_OK = CMD(0x80);
 	int chip_state = chip->state;
-	unsigned int timeo, sleep_time, reset_timeo;
+	unsigned int sleep_time, reset_timeo;
+	long int timeo;
 
 	mutex_unlock(&chip->mutex);
 	if (inval_len)
@@ -1250,7 +1259,7 @@ static int inval_cache_and_wait_for_operation(
 			timeo = reset_timeo;
 			chip->write_suspended = 0;
 		}
-		if (!timeo) {
+		if (timeo <= 0) {
 			map_write(map, CMD(0x70), cmd_adr);
 			chip->state = FL_STATUS;
 			return -ETIME;
@@ -1920,7 +1929,8 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 			printk(KERN_ERR "%s: block erase error: (bad command sequence, status 0x%lx)\n", map->name, chipstatus);
 			ret = -EINVAL;
 		} else if (chipstatus & 0x02) {
-			/* Protection bit set */
+			printk(KERN_ERR "%s: block erase error: (protection bit"
+			       " set, status 0x%lx)\n", map->name, chipstatus);
 			ret = -EROFS;
 		} else if (chipstatus & 0x8) {
 			/* Voltage */
@@ -2068,11 +2078,17 @@ static int __xipram do_xxlock_oneblock(struct map_info *map, struct flchip *chip
 	} else
 		BUG();
 
-	/*
-	 * If Instant Individual Block Locking supported then no need
-	 * to delay.
-	 */
-	udelay = (!extp || !(extp->FeatureSupport & (1 << 5))) ? 1000000/HZ : 0;
+	/* Time for operation... */
+	if (extp && (extp->FeatureSupport & (1 << 5))) {
+		/* Instant Individual Block Locking supported: no delay */
+		udelay = 0;
+	} else if (thunk == DO_XXLOCK_ONEBLOCK_LOCK) {
+		/* Lock Block = 100us (typical) */
+		udelay = 100;
+	} else {
+		/* Unlock Blocks = 0.75s (typical) */
+		udelay = 750000;
+	}
 
 	ret = WAIT_TIMEOUT(map, chip, adr, udelay, udelay * 100);
 	if (ret) {
@@ -2116,6 +2132,9 @@ static int cfi_intelext_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 static int cfi_intelext_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
+	struct map_info *map = mtd->priv;
+	struct cfi_private *cfi = map->fldrv_priv;
+	struct cfi_pri_intelext *extp = cfi->cmdset_priv;
 	int ret;
 
 #ifdef DEBUG_LOCK_BITS
@@ -2125,9 +2144,15 @@ static int cfi_intelext_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 		ofs, len, NULL);
 #endif
 
-	ret = cfi_varsize_frob(mtd, do_xxlock_oneblock,
-					ofs, len, DO_XXLOCK_ONEBLOCK_UNLOCK);
-
+	/* 'unlock' in legacy mode will unlock entire chip, so no point
+	   in performing the operation more than once. */
+	if (extp && (extp->FeatureSupport & (1 << 3)))
+		ret = cfi_varsize_frob(mtd, do_xxlock_oneblock,
+				       ofs, mtd->erasesize,
+				       DO_XXLOCK_ONEBLOCK_UNLOCK);
+	else
+		ret = cfi_varsize_frob(mtd, do_xxlock_oneblock,
+				       ofs, len, DO_XXLOCK_ONEBLOCK_UNLOCK);
 #ifdef DEBUG_LOCK_BITS
 	printk(KERN_DEBUG "%s: lock status after, ret=%d\n",
 	       __func__, ret);

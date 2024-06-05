@@ -64,6 +64,7 @@ typedef enum {
 	PHY_INTERFACE_MODE_RGMII_TXID,
 	PHY_INTERFACE_MODE_RTBI,
 	PHY_INTERFACE_MODE_SMII,
+	PHY_INTERFACE_MODE_REV_MII,
 } phy_interface_t;
 
 
@@ -263,6 +264,7 @@ enum phy_state {
  * changes in the link state.
  * adjust_state: Callback for the enet driver to respond to
  * changes in the state machine.
+ * wol: which WoL mode will be used to wake-up the system via ethtool.
  *
  * speed, duplex, pause, supported, advertising, and
  * autoneg are used like in mii_if_info
@@ -336,6 +338,7 @@ struct phy_device {
 	struct mutex lock;
 
 	struct net_device *attached_dev;
+	int wol;
 
 	void (*adjust_link)(struct net_device *dev);
 
@@ -354,6 +357,8 @@ struct phy_device {
  *   by this PHY
  * flags: A bitfield defining certain other features this PHY
  *   supports (like interrupts)
+ * wol: to define which Wake-up modes are supported (e.g. WoL
+ * via magic packet).
  *
  * The drivers must implement config_aneg and read_status.  All
  * other functions are optional. Note that none of these
@@ -369,6 +374,7 @@ struct phy_driver {
 	unsigned int phy_id_mask;
 	u32 features;
 	u32 flags;
+	u32 wol_supported;
 
 	/*
 	 * Called to initialize the PHY,
@@ -411,6 +417,9 @@ struct phy_driver {
 
 	/* Clears up any memory if needed */
 	void (*remove)(struct phy_device *phydev);
+
+	/* Handles ethtool queries for hardware time stamping. */
+	int (*ts_info)(struct phy_device *phydev, struct ethtool_ts_info *ti);
 
 	/* Handles SIOCSHWTSTAMP ioctl for hardware time stamping. */
 	int  (*hwtstamp)(struct phy_device *phydev, struct ifreq *ifr);
@@ -516,6 +525,9 @@ void phy_start_machine(struct phy_device *phydev,
 void phy_stop_machine(struct phy_device *phydev);
 int phy_ethtool_sset(struct phy_device *phydev, struct ethtool_cmd *cmd);
 int phy_ethtool_gset(struct phy_device *phydev, struct ethtool_cmd *cmd);
+int phy_ethtool_set_wol(struct phy_device *phydev, struct ethtool_wolinfo *wol);
+int phy_ethtool_get_wol(struct phy_device *phydev, struct ethtool_wolinfo *wol);
+
 int phy_mii_ioctl(struct phy_device *phydev,
 		struct ifreq *ifr, int cmd);
 int phy_start_interrupts(struct phy_device *phydev);
@@ -529,6 +541,11 @@ int phy_register_fixup_for_id(const char *bus_id,
 int phy_register_fixup_for_uid(u32 phy_uid, u32 phy_uid_mask,
 		int (*run)(struct phy_device *));
 int phy_scan_fixups(struct phy_device *phydev);
+
+int phy_init_eee(struct phy_device *phydev, bool clk_stop_enable);
+int phy_get_eee_err(struct phy_device *phydev);
+int phy_ethtool_set_eee(struct phy_device *phydev, struct ethtool_eee *data);
+int phy_ethtool_get_eee(struct phy_device *phydev, struct ethtool_eee *data);
 
 int __init mdio_bus_init(void);
 void mdio_bus_exit(void);

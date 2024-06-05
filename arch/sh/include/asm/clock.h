@@ -1,10 +1,15 @@
 #ifndef __ASM_SH_CLOCK_H
 #define __ASM_SH_CLOCK_H
 
+#ifdef CONFIG_SH_CLK
 #include <linux/sh_clk.h>
-
 /* Should be defined by processor-specific code */
 void __deprecated arch_init_clk_ops(struct sh_clk_ops **, int type);
+#endif
+#ifdef CONFIG_STM_DRIVERS
+#include <linux/stm/clk.h>
+#endif
+
 int __init arch_clk_init(void);
 
 /* arch/sh/kernel/cpu/clock-cpg.c */

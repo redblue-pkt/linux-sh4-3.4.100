@@ -26,6 +26,17 @@ config USB_ARCH_HAS_OHCI
 	# MIPS:
 	default y if MIPS_ALCHEMY
 	default y if MACH_JZ4740
+	# SH:
+	default y if CPU_SUBTYPE_SH7720
+	default y if CPU_SUBTYPE_SH7721
+	default y if CPU_SUBTYPE_SH7763
+	default y if CPU_SUBTYPE_SH7786
+	default y if CPU_SUBTYPE_FLI7610
+	default y if CPU_SUBTYPE_STX7108
+	default y if MACH_STM_STID127
+	default y if CPU_SUBTYPE_STXH205
+	default y if CPU_SUBTYPE_STIH415
+	default y if MACH_STM_STIH416
 	# more:
 	default PCI
 
@@ -46,6 +57,12 @@ config USB_ARCH_HAS_EHCI
 	default y if ARCH_MSM
 	default y if MICROBLAZE
 	default y if SPARC_LEON
+	default y if CPU_SUBTYPE_FLI7610
+	default y if CPU_SUBTYPE_STX7108
+	default y if MACH_STM_STID127
+	default y if CPU_SUBTYPE_STXH205
+	default y if CPU_SUBTYPE_STIH415
+	default y if MACH_STM_STIH416
 	default y if ARCH_MMP
 	default y if MACH_LOONGSON1
 	default PCI
@@ -53,6 +70,7 @@ config USB_ARCH_HAS_EHCI
 # some non-PCI HCDs implement xHCI
 config USB_ARCH_HAS_XHCI
 	boolean
+	default y if MACH_STM_STIH407
 	default PCI
 
 menuconfig USB_SUPPORT

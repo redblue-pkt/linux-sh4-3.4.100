@@ -21,6 +21,9 @@
  * for more details.
  */
 
+#define __access_ok(addr, size)		\
+	(__addr_ok((addr) + (size)))
+
 #define __get_user_size(x,ptr,size,retval)			\
 do {								\
 	retval = 0;						\

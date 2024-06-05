@@ -176,6 +176,9 @@ struct i2c_driver {
 	void (*shutdown)(struct i2c_client *);
 	int (*suspend)(struct i2c_client *, pm_message_t mesg);
 	int (*resume)(struct i2c_client *);
+	int (*freeze)(struct i2c_client *);
+	int (*thaw)(struct i2c_client *);
+	int (*restore)(struct i2c_client *);
 
 	/* Alert callback, for example for the SMBus alert protocol.
 	 * The format and meaning of the data value depends on the protocol.
@@ -545,6 +548,7 @@ struct i2c_msg {
 #define I2C_M_IGNORE_NAK	0x1000	/* if I2C_FUNC_PROTOCOL_MANGLING */
 #define I2C_M_NO_RD_ACK		0x0800	/* if I2C_FUNC_PROTOCOL_MANGLING */
 #define I2C_M_RECV_LEN		0x0400	/* length will be first received byte */
+#define I2C_M_NOREPSTART	0x8000
 	__u16 len;		/* msg length				*/
 	__u8 *buf;		/* pointer to msg data			*/
 };

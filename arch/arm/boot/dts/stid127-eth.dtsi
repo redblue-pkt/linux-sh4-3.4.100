@@ -1,0 +1,159 @@
+/*
+ * Copyright (C) 2013 STMicroelectronics Limited.
+ * Author(s): Giuseppe Cavallaro <peppe.cavallaro@st.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * publishhed by the Free Software Foundation.
+ */
+#include "stm-padcfg.h"
+/ {
+	/* FP RGMII config */
+	fprgmii_dev_config: fpgmac-rgmii-pad-config{
+		padcfg-0 = <&padcfg_fprgmii>;
+		sysconfs{
+		};
+	};
+
+	/* Synopsys GMAC RGMII mode TXCLK clock from Clockgen (internal clk ) */
+	rgmii0_dev_config: gmac0-rgmii-dev-config{
+		padcfg-0 = <&padcfg_rgmii0 &padcfg_gmac0_phyclk>;
+		device-seqs = <&rgmii0_dev_seqs>;
+		sysconfs{
+			EN_GMAC =	<&sysconf 286   1  1>;
+			MIIx_PHY_SEL =	<&sysconf 286   2  4>;
+			ENMIIx =	<&sysconf 286   5  5>;
+			INT_NOEXT_TXCLK = <&sysconf 286   6  6>;
+			INT_NOEXT_PHYCLK = <&sysconf 286   7  7>;
+
+		};
+	};
+	rgmii0_dev_seqs: rgmii-dev-sequence{
+		init-seq{
+			step0 {
+				EN_GMAC =		<1>;
+				MIIx_PHY_SEL =		<1>;
+				ENMIIx =		<1>;
+				INT_NOEXT_TXCLK =	<1>;
+				type = "sysconf";
+			};
+		};
+	};
+
+	/* Synopsys GMAC RGMII mode TXCLK clock from external PHYCLK */
+	rgmii0_ext_dev_config: gmac0-rgmii-ext-dev-config{
+		padcfg-0 = <&padcfg_rgmii0 &padcfg_gmac0_phyclk_ext>;
+		device-seqs = <&rgmii0_ext_dev_seqs>;
+		sysconfs{
+			EN_GMAC =	<&sysconf 286   1  1>;
+			MIIx_PHY_SEL =	<&sysconf 286   2  4>;
+			ENMIIx =	<&sysconf 286   5  5>;
+			INT_NOEXT_TXCLK = <&sysconf 286   6  6>;
+			INT_NOEXT_PHYCLK = <&sysconf 286   7  7>;
+		};
+	};
+	rgmii0_ext_dev_seqs: rgmii-ext-dev-sequence{
+		init-seq{
+			step0 {
+				EN_GMAC =		<1>;
+				MIIx_PHY_SEL =		<1>;
+				ENMIIx =		<1>;
+				INT_NOEXT_TXCLK =	<0>;
+				INT_NOEXT_PHYCLK =	<1>;
+				type = "sysconf";
+			};
+		};
+	};
+
+	/* Synopsys GMAC RMII mode internal clock */
+	rmii0_phyclk_int_dev_config: gmac0-rmii-dev-config {
+		padcfg-0 = <&padcfg_rmii0 &padcfg_gmac0_phyclk>;
+		device-seqs = <&rmii0_dev_seqs>;
+		sysconfs{
+			 EN_GMAC =	<&sysconf 286   1  1>;
+			 MIIx_PHY_SEL =	<&sysconf 286   2  4>;
+			 ENMIIx =	<&sysconf 286   5  5>;
+			 INT_NOEXT_TXCLK = <&sysconf 286   6  6>;
+			 INT_NOEXT_PHYCLK = <&sysconf 286   7  7>;
+		};
+	};
+
+	rmii0_dev_seqs: rmii-dev-sequence{
+		init-seq{
+			step0 {
+				EN_GMAC =		<1>;
+				MIIx_PHY_SEL =		<1>;
+				ENMIIx =		<1>;
+				INT_NOEXT_TXCLK =	<0>;
+				INT_NOEXT_PHYCLK =	<1>;
+				type = "sysconf";
+			};
+		};
+	};
+
+	/* Synopsys GMAC RMII mode external clock */
+	rmii0_phyclk_ext_dev_config: gmac0-rmii-dev-config {
+		padcfg-0 = <&padcfg_rmii0 &padcfg_gmac0_phyclk_ext>;
+		device-seqs = <&rmii0_phyclk_ext_dev_seqs>;
+		sysconfs{
+			 EN_GMAC =	<&sysconf 286   1  1>;
+			 MIIx_PHY_SEL =	<&sysconf 286   2  4>;
+			 ENMIIx =	<&sysconf 286   5  5>;
+			 INT_NOEXT_TXCLK = <&sysconf 286   6  6>;
+			 INT_NOEXT_PHYCLK = <&sysconf 286   7  7>;
+		};
+	};
+
+	rmii0_phyclk_ext_dev_seqs: rmii-phyclk-ext-dev-sequence{
+		init-seq{
+			step0 {
+				EN_GMAC =		<1>;
+				MIIx_PHY_SEL =		<1>;
+				ENMIIx =		<1>;
+				INT_NOEXT_TXCLK =	<0>;
+				INT_NOEXT_PHYCLK =	<0>;
+				type = "sysconf";
+			};
+		};
+	};
+
+	/* Configure the clk according to the negotiated speed in RGMII mode
+	 *  o 25Mhz for 100
+	 *  o 2.5   for 10
+	 *  o 125   for 1000
+	 * This is valid for internal clock where it is mandatory to set the
+	 * CLK_ETH0 frq and set the bit 6 for RGMII mode (indeed this clk
+	 * looks to be stable enough to be used).
+	 *
+	 * To use external clock the bit 6 (INT_NOEXT_TXCLK) has to be reset
+	 * and CLK_ETH0 cannot be set. This is still forced to 125MHz to be
+	 * used on b2112 where the R162 is missing.
+	 */
+	gmac_speed_fixups: gmac-speed-sel {
+		rgmii-speed-sel {
+			speed-1000 {
+				clk = <125000000>;
+				sysconfs {
+					INT_NOEXT_TXCLK = <1>;
+					INT_NOEXT_PHYCLK = <1>;
+				};
+			};
+
+			speed-100{
+				clk = <25000000>;
+				sysconfs {
+					INT_NOEXT_TXCLK = <1>;
+					INT_NOEXT_PHYCLK = <1>;
+				};
+			};
+
+			speed-10{
+				clk = <2500000>;
+				sysconfs {
+					INT_NOEXT_TXCLK = <1>;
+					INT_NOEXT_PHYCLK = <1>;
+				};
+			};
+		};
+	};
+};
